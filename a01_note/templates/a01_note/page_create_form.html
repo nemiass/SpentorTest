@@ -1,0 +1,96 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+<li class="breadcrumb-item active">{{ page_title|capfirst }}</li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}
+<div class="row">
+    <div class="col-lg-12 pb-3 mx-auto">
+
+        <!-- Page details -->
+        <div class="card card-form">
+            <div class="card-body col-lg-8 mx-auto p-3">
+
+                <h5 class="card-title">
+                    Page detail
+                    <span>|
+                        <span style="font-size: 0.75rem;">
+                            <i>Today <b><i class="bi bi-calendar"></i>&nbsp {% now "M d, Y" %}</b></i>
+                        </span>
+                    </span>
+                </h5>
+
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row mb-4">
+                        <div class="col-sm-12 text-danger">
+                            {{ formset.page_name }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <label for="inputText" class="col-sm-2 my-col-form-label"><i
+                                class="bi bi-card-text"></i></label>
+                        <div class="col w-1000">
+                            {{ formset.description }}
+                        </div>
+                    </div>
+
+                    <div class="row | mb-3">
+                        <label for="inputText" class="col-sm-1 my-col-form-label"><i
+                                class="bi bi-emoji-laughing"></i></label>
+                        <div id="emojiPicker_container" class="col w-auto">
+                            {{ formset.emoji }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="inputNumber" class="col-sm-1 my-col-form-label"><i class="bi bi-image"></i></label>
+                        <div class="col w-auto">
+                            {{ formset.cover }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="inputColor" class="col-sm-1 my-col-form-label"><i
+                                class="bi bi-eyedropper"></i></label>
+                        <div class="col w-100">
+                            {{ formset.hex_color }}
+                        </div>
+                    </div>
+
+                    {% comment %}
+                    <div class="row mb-3">
+                        <label class="my-col-form-label col-sm-1 pt-0"><i class="bi bi-star-fill"></i></label>
+                        <div class="col w-100">
+
+                            <div class="form-check">
+                                {{ formset.is_favourite }}
+                                <label class="form-check-label" for="gridCheck1">Is favourite?</label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endcomment %}
+
+                    <div class="row mb-3">
+                        <div class="col-sm-12 text-center">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle-fill"></i> |
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div><!-- End Page details -->
+    </div>
+</div>
+{% endblock page_section %}

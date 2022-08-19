@@ -1,0 +1,187 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    <!-- Confirmation messages -->
+    {% if messages %}
+        {% for message in messages %}
+
+            {% if message.tags == 'customized_deck_error error' %}
+
+                <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {% elif message.tags == 'customized_deck_success success' %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+
+            {% endif %}
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+
+        {% endfor %}
+    {% endif %}<!-- End Confirmation messages -->
+{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+    <li class="breadcrumb-item active">Deck community</li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block community_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- ======= EVALUATION Left side ======= -->
+            <div class="col-xl-3">
+
+                <div class="card">
+                    <div class="card-body">
+                        {% with user.boarddeck_set.first as default_board %}
+
+                        <h5 class="card-title">
+                            Pined decks
+                            <span>|
+                                <span style="font-size: 0.75rem;">
+                                    <i>Total
+                                    <b>
+                                        {% if default_board is None or default_board.decks.count == 0 %}
+                                            0
+                                        {% else %}
+                                            {{ default_board.decks.count }}
+                                        {% endif %}
+                                    </b>
+                                    decks</i>
+                                </span>
+                            </span>
+                        </h5>
+
+                        <!-- List pined decks -->
+                        {% if default_board.decks.count > 0 %}
+
+                            <form action="{% url 'evaluation:deck-customized-create' %}" method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" name="source_template" value="from_deck_community">
+
+                                <!-- Pined options -->
+                                <div class="activity">
+                                    <div class="d-flex justify-content-center">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-plus-circle-fill"></i> | Create deck
+                                        </button>
+                                        <a href="{% url 'evaluation:deck-list' %}" class="btn btn-secondary btn-sm ms-2" type="button" title="View deck list">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                    </div>
+                                </div><!-- Pined options -->
+
+                                <br>
+
+                                <!-- Deck item -->
+                                <div class="activity mb-3">
+
+                                    <div class="col-sm-12">
+                                        <ul class="list-group">
+
+                                            {% for pined_deck in default_board.decks.all %}
+
+                                                <!-- List pined decks -->
+                                                {% include 'evaluation/layout/list_pined_deck_item.html' with deck=pined_deck %}
+                                                <!-- End List pined decks -->
+
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+
+                                </div> <!-- Deck item -->
+
+                            </form>
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted mt-4">
+                                    <span style="font-size: 5rem;">👀️</span>
+                                    <h6 class="py-2 mb-1">
+                                        <span class="badge rounded-pill bg-light text-muted">No pined <i class="bi bi-suit-club-fill text-primary"></i> decks</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                        {% endwith %}<!-- List pined decks -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ======= EVALUATION Right side ======= -->
+            <div class="col-xl-9">
+
+                <!-- Shared decks -->
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            Shared decks
+                            <span>| <span style="font-size: 0.75rem;"><i>Today {% now "M d, Y" %}</i></span></span>
+                        </h5>
+
+                        <!-- Deck list -->
+                        {% if object_list.count > 0 %}
+                            <div id="shared-decks-container" class="activity mt-1 table-responsive-sm">
+
+                                <table id='shared-decks-datatable' class="table">
+                                    <tbody class="row g-0">
+
+                                        <!-- Deck item -->
+                                        {% for deck in object_list %}
+                                            <tr class="col-12 col-md-6 px-0">
+
+                                                <!-- List shared decks -->
+                                                {% include 'evaluation/layout/cell_shared_deck_item.html' with deck=deck %}
+                                                <!-- End List shared decks -->
+
+                                            </tr>
+                                        {% endfor %}
+                                        <!-- End Deck item -->
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted mt-4">
+                                    <span style="font-size: 5rem;">👀️</span>
+                                    <h6 class="py-2 mb-1">
+                                        <span class="badge rounded-pill bg-light text-muted">No shared <i class="bi bi-suit-club-fill text-primary"></i> decks</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}<!-- End Deck list -->
+
+                    </div>
+                </div><!-- End Shared decks -->
+
+            </div>
+
+        </div>
+    </section>
+{% endblock community_section %}

@@ -1,0 +1,150 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|title }} {% endblock page_title %}
+
+{% block page_notification %}
+    <!-- Registration messages -->
+    {% if messages %}
+
+        {% for message in messages %}
+
+            {% if message.tags == 'success' %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {% else %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+
+            {% endif %}
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div><!-- End Registration messages -->
+        {% endfor %}
+
+    {% endif %}
+{% endblock page_notification %}
+
+{% block page_section %}
+    <div class="row">
+    <!-- Page as card -->
+    {% for page in object_list %}
+
+        <div class="col-lg-3 pb-3">
+
+            <!-- Modal confirm deletion -->
+            {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='a01_note:page-delete' model_id=page.id forloop_counter=forloop.counter only %}
+            <!-- End Modal confirm deletion -->
+
+            <!-- Page COVER -->
+            {% if page.cover %}
+                <div class="card card-cover h-100 overflow-hidden text-white rounded-5 shadow-lg" style="background-image: url('{{ page.cover.url }}'); background-position: center; background-repeat: no-repeat; background-size: cover;">
+            {% elif page.hex_color != '#0dcaf0' %}
+                <div class="card card-cover h-100 overflow-hidden text-white rounded-5 shadow-lg" style="background-color: {{ page.hex_color }};">
+            {% else %}
+                <div class="card card-cover h-100 overflow-hidden text-white rounded-5 shadow-lg" style="background-color: var(--bs-indigo);">
+            {% endif %}
+                    <div class="d-flex flex-column h-100 p-4 pb-2 text-white text-shadow-1">
+                        <ul class="d-flex list-unstyled">
+
+                            {% comment %}
+                            <!-- Page IS_FAVOURITE --> <!-- TODO: Add a way to select for being or not favourite -->
+                            <li class="me-auto">
+                                {% if page.is_favourite %}
+                                    <a href="#" class="card-link text-start text-reset"><i class="bi bi-star-fill"></i></a>
+                                {% endif %}
+                            </li>
+                            {% endcomment %}
+
+                            <!-- Page options -->
+                            <li class="d-flex align-items-center">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-transparent btn-sm text-white" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <!-- <li>
+                                            <a class="dropdown-item py-1" type="button">
+                                                <i class="bi bi-share-fill" style="font-size: 0.8rem;"></i>
+                                                <span>Share</span>
+                                            </a>
+                                        </li> -->
+                                        <li>
+                                            <a href="{% url 'a01_note:page-trash' page.id %}" class="dropdown-item py-1" type="button">
+                                                <i class="bi bi-trash2-fill" style="font-size: 0.8rem;"></i>
+                                                <span>Move to trash</span>
+                                            </a>
+                                        </li>
+
+                                        <!-- Button trigger modal -->
+                                        <li class="border-top">
+                                            <a class="dropdown-item | py-0 pt-1 text-danger"  type="button" data-bs-toggle="modal" data-bs-target="#modalConfirmDelete-{{ forloop.counter }}">
+                                                <i class="bi bi-trash text-danger" style="font-size: 0.8rem;"></i>
+                                                <span>Delete</span>
+                                            </a>
+                                        </li><!-- End Button trigger modal -->
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul><!-- End Page options -->
+
+                        <!-- Page NAME -->
+                        <h2 class="pt-5 mt-5 mb-3 lh-1 fw-bold">
+                            <a href="{% url 'a01_note:page-detail' page.id %}" class="text-reset">{{ page.page_name|capfirst }}</a>
+                        </h2>
+
+                        {% comment %}
+                        <!-- Page TAGS -->
+                        <h6 class="card-subtitle mb-2 lh-base">
+                            {% for tag in page.tag_set.all %}
+                            <a href="#" class="text-reset">
+                                <span class="badge bg-primary">{{ tag.tag_name }}</span>
+                            </a>&nbsp
+                            {% empty %}
+                            <i>Add your tags inside...</i>
+                            {% endfor %}
+                        </h6><!-- End Page TAGS -->
+                        {% endcomment %}
+
+                        <!-- Page EMOJI & DATE -->
+                        <ul class="d-flex list-unstyled mt-auto mb-1">
+                            <li class="me-auto">
+                                {% if page.emoji  %}
+                                    <a href="#" class="card-link fs-2">{{ page.emoji }}</a>
+                                {% endif  %}
+                            </li>
+                            <li class="d-flex align-items-center text-end">
+                                <i class="bi bi-calendar3 me-2"></i>
+                                <small>{{ page.updated_at|date:'D, d M Y' }}</small>
+                            </li>
+                        </ul><!-- End Page EMOJI & DATE -->
+                    </div>
+                </div>
+        </div><!-- End Page as card -->
+    {% endfor %}
+
+        <!-- Add New page -->
+        <div class="col-lg-3 pb-3">
+            <div class="card card-cover h-100 overflow-hidden text-white bg-secondary rounded-5 shadow-lg">
+
+                <div class="d-flex flex-column h-100 p-4 pb-5 text-white text-shadow-1 text-center">
+                    <h2 class="pt-5 mt-5 mb-3 lh-1 fw-bold">
+                        <a href="{% url 'a01_note:page-create' %}" class="card-link text-reset">
+                            <svg width="64" height="64" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                            </svg>
+                        </a>
+                    </h2>
+                    <h6 class="card-subtitle mb-2">Add new page</h6>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock page_section %}

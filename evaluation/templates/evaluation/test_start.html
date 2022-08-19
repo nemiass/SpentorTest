@@ -1,0 +1,196 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_breadcrumb %}
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+        <!-- Deck list -->
+        <li class="breadcrumb-item">
+            ...
+        </li><!-- End Deck list -->
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item">
+            {% if test.deck.type == '0' %}
+                <a href="{% url 'a01_note:page-detail' test.deck.page.id %}#deck-detail" class="text-reset" title="{{ test.deck.deck_name }}">
+                    {{ test.deck.deck_name|truncatewords:3 }}
+                </a>
+            {% else %}
+                <a href="{% url 'evaluation:deck-detail' test.deck.id %}" class="text-reset" title="{{ test.deck.deck_name }}">
+                    {{ test.deck.deck_name|truncatewords:3 }}
+                </a>
+            {% endif %}
+        </li><!-- End Deck title -->
+
+        <!-- Test list -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:test-list' test.deck.id %}" class="text-reset" title="Test list">
+                Test list
+            </a>
+        </li><!-- End Test list -->
+
+        <!-- Test detail -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:test-detail' test.id %}" class="text-reset" title="{{ test }}">
+                {{ test|truncatewords:3 }}
+            </a>
+        </li><!-- End Test detail -->
+
+        <!-- Test start -->
+        <li class="breadcrumb-item active">
+            Start
+        </li><!-- End Test start -->
+
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block test_section %}
+    <section class="section dashboard">
+
+        <div class="row">
+            <div class="col-lg-12 pb-3 mx-auto">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            Start your test
+                            <span>| <span style="font-size: 0.75rem;"><i>You have <b>{{ card_list.count }}</b> questions</i></span></span>
+                        </h5>
+
+                        <!-- Card tabs as questions number -->
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            {% for card in card_list %}
+                                <li class="nav-item" role="presentation">
+
+                                    <button class="nav-link {% if forloop.counter == 1 %}active{% endif %}" id="tab_card-{{ forloop.counter }}" data-bs-toggle="tab"
+                                    data-bs-target="#tab_card_target-{{ forloop.counter }}" type="button" role="tab" aria-controls="tab_card_target-{{ forloop.counter }}" aria-selected="true">
+                                        {{ forloop.counter }}
+                                    </button>
+
+                                </li>
+                            {% endfor %}
+
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab_card-submit" data-bs-toggle="tab"
+                                data-bs-target="#tab_card_target-submit" type="button" role="tab" aria-controls="tab_card_target-submit" aria-selected="true">
+                                    Save
+                                </button>
+                            </li>
+
+                        </ul><!-- End Card tabs as questions number -->
+
+                        <!-- Start test form  -->
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <div class="tab-content pt-2" id="myTabContent">
+
+                                {% for card in card_list %}
+                                    <div class="tab-pane fade {% if forloop.counter == 1 %}show active{% endif %}" id="tab_card_target-{{ forloop.counter }}" role="tabpanel" aria-labelledby="tab_card-{{ forloop.counter }}">
+
+                                        <div class="row mb-2 mt-3">
+
+                                            <!-- Card question (front)  -->
+                                            <div class="col-sm-10 mx-auto">
+
+                                                <figure>
+                                                    <blockquote class="blockquote">
+                                                        <p>{{ card.front|safe }}</p>
+                                                    </blockquote>
+                                                    <figcaption class="blockquote-footer">
+                                                        Take your <cite title="Source Title">time</cite>
+                                                        <br>
+                                                        <br>
+                                                        <a class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnswer-{{ forloop.counter }}" aria-expanded="false" aria-controls="collapseAnswer-{{ forloop.counter }}">
+                                                            Show answer
+                                                        </a>
+                                                    </figcaption>
+                                                </figure>
+
+                                            </div><!-- End Card question -->
+
+                                            <!-- Card answer (back and extra)  -->
+                                            <div class="col-sm-8 mx-auto collapse" id="collapseAnswer-{{ forloop.counter }}">
+                                                <figure>
+                                                    <br>
+                                                    <figcaption class="blockquote-footer">
+                                                        <cite title="Source Title" class="text-primary">Answer</cite>
+                                                        {{ card.back|safe }}
+                                                    </figcaption>
+
+                                                    <br>
+
+                                                    {% if card.extra_info %}
+                                                        <figcaption class="blockquote-footer">
+                                                            <cite title="Source Title">Extra info</cite>
+                                                            {{ card.extra_info|safe }}
+                                                        </figcaption>
+                                                    {% endif %}
+                                                </figure>
+                                            </div><!-- End Card answer -->
+
+                                            <!-- Card answer options -->
+                                            <div class="col-sm-10 mx-auto card-answer-container">
+                                                <hr>
+
+                                                <input type="hidden" name="{{ in_name_card }}{{ card.id }}" value="{{ card.id }}">
+
+                                                <input type="radio" class="btn-check" name="{{ in_name_answer }}{{ card.id }}" id="answer1-{{ card.id }}" autocomplete="off" value="{{ score_nr }}">
+                                                <label id="answer1-label-{{ forloop.counter }}" class="btn btn-sm btn-outline-danger me-3 my-2" for="answer1-{{ card.id }}" style="min-width: 180px;">
+                                                    <i class="bi bi-emoji-frown"></i> |
+                                                    {{ score_nr_value }}
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="{{ in_name_answer }}{{ card.id }}" id="answer2-{{ card.id }}" autocomplete="off" value="{{ score_hr }}" Checked>
+                                                <label id="answer2-label-{{ forloop.counter }}" class="btn btn-sm btn-outline-warning me-3 my-2" for="answer2-{{ card.id }}" style="min-width: 180px;">
+                                                    <i class="bi bi-emoji-neutral"></i> |
+                                                    {{ score_hr_value }}
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="{{ in_name_answer }}{{ card.id }}" id="answer3-{{ card.id }}" autocomplete="off" value="{{ score_er }}">
+                                                <label id="answer3-label-{{ forloop.counter }}" class="btn btn-sm btn-outline-info my-2" for="answer3-{{ card.id }}" style="min-width: 180px;">
+                                                    <i class="bi bi-emoji-smile"></i> |
+                                                    {{ score_er_value }}
+                                                </label>
+
+                                            </div><!-- End Card answer options -->
+                                        </div>
+                                    </div>
+                                {% endfor %}
+
+                                <div class="tab-pane fade" id="tab_card_target-submit" role="tabpanel" aria-labelledby="tab_card-submit">
+
+                                    <div class="row mb-2 mt-3">
+                                        <div class="col-sm-10 mx-auto">
+
+                                            <figure>
+                                                <blockquote class="blockquote">
+                                                    That was all. Good job!
+                                                </blockquote>
+                                                <figcaption class="blockquote-footer">
+                                                    So, <cite title="Source Title">Bye bye : )</cite>
+                                                    <br>
+                                                    <br>
+                                                    <a href="{% url 'evaluation:test-detail' test.id %}" type="button" class="btn btn-secondary btn-sm">Go back</a>
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+                                                </figcaption>
+                                            </figure>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form><!-- End Start test form  -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+{% endblock test_section %}

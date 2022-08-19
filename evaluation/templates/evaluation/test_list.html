@@ -1,0 +1,273 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+        <!-- Deck list -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:deck-list' %}" class="text-reset" title="Deck list">
+                Deck list
+            </a>
+        </li><!-- End Deck list -->
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item">
+            {% if deck.type == '0' %}
+                <a href="{% url 'a01_note:page-detail' deck.page.id %}#deck-detail" class="text-reset" title="{{ deck.deck_name }}">
+                    {{ deck.deck_name|truncatewords:3 }}
+                </a>
+            {% else %}
+                <a href="{% url 'evaluation:deck-detail' deck.id %}" class="text-reset" title="{{ deck.deck_name }}">
+                    {{ deck.deck_name|truncatewords:3 }}
+                </a>
+            {% endif %}
+        </li><!-- End Deck title -->
+
+        <!-- Test list -->
+        <li class="breadcrumb-item active">
+            Test list
+        </li><!-- End Test list -->
+
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block test_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- ======= EVALUATION Left side ======= -->
+            <div class="col-lg-3">
+                <!-- Test stadistics -->
+                <div class="card pb-4">
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">
+                            Stadistics
+                            <span>| <span style="font-size: 0.75rem;"><i>Total <b>{{ score_list.all_card }}</b> cards</i></span></span>
+                        </h5>
+
+                        {% if object_list.count > 0 %}
+                            <!-- Donut Chart -->
+                            <div id="testDonut-0"></div>
+
+                            <script>
+
+                                document.addEventListener("DOMContentLoaded", () => {
+                                    new ApexCharts(document.querySelector("#testDonut-0"), {
+                                        series: [{{ score_list.NR_all }}, {{ score_list.HR_all }}, {{ score_list.ER_all }}],
+                                        chart: {
+                                            type: 'donut',
+                                            height: 350,
+                                            toolbar: {
+                                                show: false
+                                            }
+                                        },
+                                        labels: ['{{ score_type.NR }}', '{{ score_type.HR }}', '{{ score_type.ER }}'],
+                                        colors:['#dc3545', '#ffc107', '#0dcaf0'],
+                                        legend: {
+                                            position: 'bottom'
+                                        }
+                                    }).render();
+                                });
+
+                            </script>
+                            <!-- End Donut Chart -->
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted mt-4">
+                                    <span style="font-size: 5rem;">👀️</span>
+                                    <h6 class="py-2 mb-1">
+                                        <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div><!-- End Test stadistics -->
+
+            </div><!-- End EVALUATION Left side -->
+
+            <!-- ======= EVALUATION Right side ======= -->
+            <div class="col-lg-9">
+
+                <!-- Test list -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                History
+                                <span>| <span style="font-size: 0.75rem;"><i>About <b>{{ object_list.count }}</b> tests</i></span></span>
+                            </h5>
+
+                            {% if deck.type == '0' %}
+                                <div class="row mb-4">
+                                    <div class="col-sm-12 text-center">
+                                        <a href="{% url 'a01_note:page-detail' deck.page.id %}#deck-detail" class="btn btn-secondary btn-sm" type="button">
+                                            <i class="bi bi-eye-fill"></i>
+                                            <span>| View deck parent</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            {% else %}
+                                <div class="row mb-4">
+                                    <div class="col-sm-12 text-center">
+                                        <a href="{% url 'evaluation:deck-detail' deck.id %}" class="btn btn-secondary btn-sm" type="button">
+                                            <i class="bi bi-eye-fill"></i>
+                                            <span>| View customized deck</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="activity">
+                                <div class="">
+
+                                    <div class="list-group w-100">
+                                        {% for test in object_list %}
+
+                                            <a href="{% url 'evaluation:test-detail' test.id %}" class="list-group-item list-group-item-action {% if test.is_active == True %} active {% endif %}" aria-current="true">
+
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">{{ test }}</h5>
+
+                                                    {% if test.is_active == False %}
+                                                        <small>{{ test.held_on }}</small>
+                                                    {% else %}
+                                                        <small>Scheduled</small>
+                                                    {% endif %}
+
+                                                </div>
+
+                                                <p class="mb-1">
+                                                    <span class="badge rounded-pill bg-danger">{{ test.score_nr }}</span>
+                                                    <span class="text-danger"> NR</span>
+
+                                                    <i class="bi bi-dash-lg"></i>
+
+                                                    <span class="badge rounded-pill bg-warning">{{ test.score_hr }}</span>
+                                                    <span class="text-warning">HR</span>
+
+                                                    <i class="bi bi-dash-lg"></i>
+
+                                                    <span class="badge rounded-pill bg-info">{{ test.score_er }}</span>
+                                                    <span class="text-info">ER</span>
+                                                </p>
+
+                                                {% if test.is_active == True %}
+                                                    <small class="text-white">There are {{ test.score_set.count }} questions</small>
+                                                {% else %}
+                                                    <small class="text-muted">There were {{ test.score_set.count }} questions</small>
+                                                {% endif %}
+                                            </a>
+
+                                        {% empty %}
+                                            <div class="text-center | text-muted">
+                                                <span style="font-size: 5rem;">👀️</span>
+                                                <h5 class="text-muted py-2 mb-1">Oh!. It seems you haven't create any test yet.</h5>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End Test list -->
+
+                <!-- Test report -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Report
+                                <span>| <span style="font-size: 0.75rem;"><i>Today {% now "M d, Y" %}</i></span></span>
+                            </h5>
+
+                            {% if object_list.count > 0 %}
+                                <!-- Line Chart -->
+                                <div id="reportsChart-0"></div>
+
+                                <script>
+
+                                    document.addEventListener("DOMContentLoaded", () => {
+                                        new ApexCharts(document.querySelector("#reportsChart-0"), {
+                                            series: [{
+                                                name: '{{ score_type.NR }}',
+                                                data: {{ score_list.NR }}
+                                            }, {
+                                                name: '{{ score_type.HR }}',
+                                                data: {{ score_list.HR }}
+                                            }, {
+                                                name: '{{ score_type.ER }}',
+                                                data: {{ score_list.ER }}
+                                            }],
+                                            chart: {
+                                                type: 'area',
+                                                height: 350,
+                                                toolbar: {
+                                                    show: false
+                                                },
+                                            },
+                                            markers: {
+                                                size: 4
+                                            },
+                                            colors: ['#dc3545', '#ffc107', '#0dcaf0'],
+                                            fill: {
+                                                type: "gradient",
+                                                gradient: {
+                                                    shadeIntensity: 1,
+                                                    opacityFrom: 0.3,
+                                                    opacityTo: 0.4,
+                                                    stops: [0, 90, 100]
+                                                }
+                                            },
+                                            dataLabels: {
+                                                enabled: false
+                                            },
+                                            stroke: {
+                                                curve: 'smooth',
+                                                width: 2
+                                            },
+                                        }).render();
+                                    });
+
+                                </script>
+                                <!-- End Line Chart -->
+
+                            {% else %}
+                                <div class="row mb-3 text-center">
+
+                                    <div class="col-12 | text-muted mt-4">
+                                        <span style="font-size: 5rem;">👀️</span>
+                                        <h6 class="py-2 mb-1">
+                                            <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                        </h6>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End Test report -->
+
+            </div><!-- End Right side -->
+        </div>
+    </section>
+{% endblock test_section %}

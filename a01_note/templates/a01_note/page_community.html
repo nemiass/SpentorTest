@@ -1,0 +1,139 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+    <li class="breadcrumb-item active">Page community</li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block community_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- Single column -->
+            <div class="col-lg-12">
+
+                <!-- Shared pages -->
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            Shared pages
+                            <span>| <span style="font-size: 0.75rem;"><i>Today {% now "M d, Y" %}</i></span></span>
+                        </h5>
+
+                        <!-- Page list -->
+                        {% if object_list.count > 0 %}
+                            <div id="shared-pages-container" class="activity mt-1">
+
+                                <table id='shared-pages-datatable' class="table">
+                                    <tbody class="row">
+
+                                        <!-- Page item -->
+                                        {% for page in object_list %}
+                                            <tr class="col-12 col-md-6 col-xl-4 px-0">
+
+                                                <td class="list-group border-0 w-auto h-100" style="width: 100vw;">
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center h-100 px-3">
+
+                                                        <!-- Page cover -->
+                                                        <div class="card-icon d-flex align-items-center justify-content-center">
+
+                                                            <div class="rounded-circle" style="width: 60px; height: 60px;
+                                                                {% if page.cover %}
+                                                                    background-image: url('{{ page.cover.url }}'); background-position: center; background-repeat: no-repeat; background-size: cover; opacity: 0.5;
+                                                                {% elif page.hex_color != '#0dcaf0' %}
+                                                                    background-color: {{ page.hex_color }}; opacity: 0.75;
+                                                                {% else %}
+                                                                    background-color: var(--bs-light);
+                                                                {% endif %}
+                                                            ">
+                                                            </div>
+
+                                                            <div class="d-flex align-items-center" style="position: absolute;">
+                                                                <span class="w-100 text-center">
+
+                                                                    {% if page.emoji %}
+                                                                        {{ page.emoji }}
+                                                                    {% else %}
+                                                                        {{ page.page_name|slice:":1"|capfirst }}
+                                                                    {% endif %}
+
+                                                                </span>
+                                                            </div>
+
+                                                        </div><!-- End Page cover -->
+
+                                                        <!-- Page detail -->
+                                                        <div class="px-2 me-auto">
+
+                                                            <!-- Page name -->
+                                                            <h5 class="mb-1">
+                                                                <a href="{% url 'a01_note:page-detail' page.id %}" class="text-reset" title="{{ page.page_name }}">
+                                                                    {{ page.page_name|truncatechars:30 }}
+                                                                </a>
+                                                            </h5><!-- End Page name -->
+
+                                                            <!-- Page description -->
+                                                            {% if page.description %}
+                                                                <p class="mb-1 text-secondary">{{ page.description|truncatechars:70 }}</p>
+                                                            {% endif %}<!-- End Page description -->
+
+                                                            <!-- Page owner -->
+                                                            <small class="text-muted">
+                                                                <i class="bi bi-dash-lg"></i>
+                                                                <span class="badge bg-primary">
+                                                                    @{{ page.owner }}
+                                                                </span>
+                                                            </small><!-- End Page owner -->
+
+                                                        </div><!-- Page detail -->
+
+                                                        {% comment %}
+                                                        <div class="h-100">
+                                                            <span class="badge bg-primary rounded-pill mb-auto">
+                                                                <i class="bi bi-three-dots mb-auto"></i>
+                                                            </span>
+                                                        </div>
+                                                        {% endcomment %}
+
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+                                        {% endfor %}
+                                        <!-- End Page item -->
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted mt-4">
+                                    <span style="font-size: 5rem;">👀️</span>
+                                    <h6 class="py-2 mb-1">
+                                        <span class="badge rounded-pill bg-light text-muted">No shared <i class="bi bi-stickies-fill text-warning"></i> pages</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}
+                        <!-- End Page list -->
+
+                    </div>
+                </div><!-- End Shared pages -->
+
+            </div><!-- End Single column -->
+
+        </div>
+    </section>
+{% endblock community_section %}

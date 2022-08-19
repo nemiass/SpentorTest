@@ -1,0 +1,24 @@
+<div class="modal fade" id="modalConfirmDelete-{{ forloop_counter }}" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel-{{ forloop_counter }}" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header | my-auto py-2">
+                <span class="pe-2"><i class="bi bi-info-circle-fill"></i></span>
+                <h6 class="modal-title" id="modalConfirmDeleteLabel-{{ forloop_counter }}">
+                    <strong class="me-auto">Are you sure?</strong>
+                </h6>
+                <!-- <small>Just now</small> -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body | text-center">
+                    <a href="{% url view_name model_id %}{{ url_hash|default_if_none:'' }}" type="button" class="btn btn-danger btn-sm">
+                        Delete permanently
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+            </div>
+
+        </div>
+    </div>
+</div>

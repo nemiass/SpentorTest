@@ -1,0 +1,31 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|title }} {% endblock page_title %}
+
+{% block page_section %}
+        <div class="row">
+            <div class="col-lg-12 pb-3 mx-auto">
+                <div class="card card-form">
+                    <div class="card-body col-lg-10 mx-auto mt-3">
+                        <!-- Property form -->
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ formset.property_type.label }} {{ formset.property_type }}<br>
+                            {{ formset.property_name.label }} {{ formset.property_name }}<br>
+                            {{ formset.order_number.label }} {{ formset.order_number }}<br>
+
+                            <div class="row mb-3">
+                                <!-- <label class="col-sm-1 col-form-label">Submit</label> -->
+                                <div class="col-sm-12 text-center">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                            <br>
+                        </form><!-- Property form -->
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock page_section %}

@@ -1,0 +1,89 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_section %}
+<!-- Page in TRASH  -->
+    <div class="row">
+        <div class="col-lg-12 pb-3 mx-auto">
+        {% if trash_page_list %}
+            <div class="card card-form">
+                <div class="card-header">What do you wanna do?</div>
+
+                <div class="container">
+                    <div class="card-body mt-3">
+                        <div class="row table-responsive | my-3 mx-auto">
+                            <table class="table table-hover table-sm" style="font-size: 0.9rem;">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="text-center">Actions</th>
+                                        <th scope="col" class="col-sm-4">Page name</th>
+                                        <th scope="col" class="text-center">Emoji</th>
+                                        <th scope="col" class="col-sm-4">Parent</th>
+                                        <th scope="col" class="col-sm-3">Modified</th>
+                                    </tr>
+                                </thead>
+    <!-- Page items -->
+                                <tbody>
+                                {% for page in trash_page_list %}
+
+                                    <!-- Modal confirm deletion -->
+                                    {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='a01_note:page-delete' model_id=page.id forloop_counter=forloop.counter only %}
+                                    <!-- End Modal confirm deletion -->
+
+                                    <tr>
+                                        <td class="d-flex | text-center">
+                                            <a href="{% url 'a01_note:page-trash-update' page.id %}" type="button" class="btn-outline-primary | btn-sm me-1" title="Restore">
+                                                <i class="bi bi-bootstrap-reboot"></i>
+                                            </a>
+                                            <a type="button" class="btn-outline-danger btn-sm" title="Delete permanently" data-bs-toggle="modal" data-bs-target="#modalConfirmDelete-{{ forloop.counter }}">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </td>
+
+                                        <td>{{ page.page_name }}</td>
+
+                                        <td class="text-center">
+                                        {% if page.emoji %}
+                                            {{ page.emoji }}
+                                        {% endif %}
+                                        </td>
+
+                                        <td style="font-size: auto;">
+                                        {% if page.level == 0 %}    <!-- REVIEW: Check the logic for trashed page children -->
+                                            <i>Main page</i>
+                                        {% else %}
+                                            {% if page.page_parent.in_trash == False %}
+                                                <a href="{% url 'a01_note:page-detail' page.page_parent.id %}" class="text-reset">
+                                                    <i>{{ page.page_parent.page_name }}</i>
+                                                </a>
+                                            {% endif %}
+
+                                        {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{ page.moved_trash_at|date:"M d Y, \a\t h:i A" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+
+                            </table><!-- End Page items -->
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                It seems you haven't moved anypage to the Trash section️...😃️
+            </div>
+        {% endif %}
+        </div>
+    </div><!-- End Page in TRASH -->
+{% endblock page_section %}

@@ -1,0 +1,59 @@
+<li class="list-group-item d-flex justify-content-between align-items-start">
+
+    <!-- Deck options -->
+    <div class="d-flex flex-column align-self-center">
+
+        <!-- Deck checkbox -->
+        {% if deck.card_set.count == 0 or deck.is_shared == False %}
+            <input class="form-check-input me-1 border-0 bg-transparent" type="checkbox" aria-label="Checkbox" disabled style="min-width: 14px;">
+        {% else %}
+            <input class="form-check-input me-1" type="checkbox" name="chkbx_id_deck-{{ deck.id }}" value="{{ deck.id }}" aria-label="Checkbox" style="min-width: 14px;">
+        {% endif %}
+        <!-- End Deck checkbox -->
+
+        <!-- Deck unpin -->
+        <div class="mt-1 me-1">
+            <a href="{% url 'evaluation:deck-community-pin' deck.id %}"type="button" class="btn btn-sm p-0">
+                <i class="bi bi-pin-angle-fill text-muted"></i>
+            </a>
+        </div><!-- End Deck unpin -->
+
+    </div><!-- Deck options -->
+
+    <!-- Deck detail -->
+    <div class="ms-2 me-auto">
+
+        <!-- Deck name -->
+        <div class="fw-bold">
+            {% if deck.is_shared == True %}
+                <a href="{% url 'evaluation:deck-community-detail' deck.id 'd' %}" type="button" class="" title="{{ deck.deck_name }}" target="_blank" rel="noopener noreferrer" style="font-size: 0.7rem;">
+                    {{ deck.deck_name }}
+                </a>
+            {% else %}
+                <a type="button" class="text-muted" title="[No longer shared] {{ deck.deck_name }}" style="font-size: 0.7rem;">
+                    {{ deck.deck_name }}
+                </a>
+            {% endif %}
+        </div><!-- Deck name -->
+
+        <!-- Deck owner -->
+        <span class="fst-italic text-muted" style="font-size: 0.75rem;">
+            <span class="badge
+                {% if deck.card_set.count > 0 %}
+                    bg-secondary
+                {% else %}
+                    bg-transparent border text-muted
+                {% endif %}
+
+            ">
+                {{ deck.card_set.count }} <i class="bi bi-suit-club-fill"></i>
+            </span>
+
+            <i class="bi bi-dash-lg"></i>
+            <span class="badge bg-primary">@{{ deck.owner }}</span>
+
+        </span><!-- End Deck owner -->
+
+    </div><!-- End Deck detail -->
+
+</li>

@@ -1,0 +1,315 @@
+/*--------------------------------------------------------------
+** Main
+--------------------------------------------------------------*/
+main#main.main {
+  margin-top: 60px;
+  padding-top: 0;
+}
+
+/*--------------------------------------------------------------
+** Header
+--------------------------------------------------------------*/
+
+.header {
+  height: 40px;
+  /* box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1) */
+  box-shadow: 0px 2px 20px transparent;
+  background-color: #ffffff;
+  margin: 0px;
+  border-radius: 0px;
+}
+.header .toggle-sidebar-btn {
+  font-size: 18px;
+  padding-left: 0px;
+  width: 22px;
+}
+/* If .toggle-sidebar-btn has .bi-list, set another font size */
+/* .header .toggle-sidebar-btn:not(.bi-chevron-double-right) {
+    font-size: 22px;
+} */
+.header #toggle-sidebar-btn.bi-list {
+  font-size: 22px;
+}
+
+/*--------------------------------------------------------------
+** Header Nav
+--------------------------------------------------------------*/
+.header-nav .nav-icon {
+  font-size: 16px;
+}
+.header-nav .nav-profile img {
+  max-height: 20px;
+}
+.header-nav .badge-number {
+  font-size: 10px;
+}
+.header-nav .profile {
+  min-width: 200px;
+}
+
+/*--------------------------------------------------------------
+** Sidebar
+--------------------------------------------------------------*/
+.sidebar {
+  top: 60px;
+  width: 240px;
+  height: 84%;
+  padding: 10px;
+  margin-left: 10px;
+  scrollbar-width: none;
+  box-shadow: 0px 0px 20px transparent;
+  border-radius: 5px;
+}
+@media (max-width: 1199px) {
+  .sidebar {
+    margin-left: -300px;
+  }
+}
+@media (min-width: 1200px) {
+  #main,
+  #footer {
+    margin-left: 250px;
+  }
+}
+@media (max-width: 1199px) {
+  .toggle-sidebar .sidebar {
+    margin-left: 10px;
+  }
+}
+@media (min-width: 1200px) {
+  .toggle-sidebar #main,
+  .toggle-sidebar #footer {
+    margin-left: 0;
+  }
+  .toggle-sidebar .sidebar {
+    margin-left: -300px;
+  }
+}
+.sidebar-nav .nav-heading {
+  font-size: 11px;
+  font-style: italic;
+}
+.sidebar-nav .nav-link {
+  font-size: 14px;
+  padding: 1px 5px;
+}
+.sidebar-nav .nav-link i {
+  font-size: 16px;
+}
+.sidebar-nav .nav-link:hover {
+  background: transparent;
+}
+/* New settings */
+.sidebar-nav .nav-item .d-flex:hover {
+  background: #f6f9ff;
+}
+/* .sidebar-nav .nav-link i.bi-chevron-down {
+    margin-right: 0;
+    transition: transform 0.2s ease-in-out;
+} */
+.sidebar-nav .nav-content a {
+  padding: 2px 0 2px 20px;
+}
+
+.sidebar-nav .nav-content a i {
+  font-size: 14px;
+}
+
+/** New settings for sidebar (new CSS classes) **/
+.sidebar-nav .nav-page-item {
+  height: 26px;
+}
+.sidebar-nav div.nav-page-toggle {
+  width: 24px;
+}
+.sidebar-nav .nav-page-item .nav-page-toggle a {
+  background: transparent;
+  padding: 0 5px 0 5px;
+}
+.sidebar-nav .page-children-nav {
+  padding-left: 13px;
+}
+.sidebar-nav .nav-page-link {
+  font-weight: 600;
+  /* font-size: 14px; */
+}
+.sidebar-nav .nav-page-link a {
+  font-size: 13px;
+}
+.sidebar-nav .nav-page-item .nav-page-link a {
+  color: #012970 !important;
+  padding: 0px;
+}
+.sidebar-nav .nav-page-item .nav-page-optionBtn {
+  height: 20px;
+  width: 20px;
+  padding: 0 2px 0 2px;
+}
+.sidebar-nav .nav-page-item .nav-page-optionBtn:hover {
+  color: white;
+}
+/** Notification for the visualization overflow(page level > 10) **/
+.sidebar-nav .page-children-nav #page-overflow-msg {
+  position: relative;
+  left: -120px;
+}
+
+/*--------------------------------------------------------------
+** Main
+--------------------------------------------------------------*/
+#main {
+  margin-top: 60px;
+  padding: 10px 30px;
+  transition: all 0.3s;
+}
+
+/*--------------------------------------------------------------
+** Custom styles
+--------------------------------------------------------------*/
+/* Card --------------------*/
+.card.card-form {
+  box-shadow: none;
+}
+.card-body.card-img-cover {
+  /* height: 200px!important; */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.card-img-cover-2 {
+  /* height: 600px!important; */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.card-form .my-col-form-label {
+  width: 50px;
+  text-align: center;
+}
+.card-form .my-col-form-label i {
+  color: #012970;
+}
+
+/* Form's inputs --------------------*/
+input:focus,
+select:focus,
+select,
+input.form-control:focus {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+/* textarea:focus, input:focus, input[type]:focus {
+border-color: rgb(255, 144, 0);
+box-shadow: 0 1px 1px rgba(229, 103, 23, 0.075)inset, 0 0 8px rgba(255,144,0,0.6);
+outline: 0 none;
+} */
+form.page-form .form-item label {
+  color: transparent;
+}
+form.page-form .form-item:hover label {
+  color: inherit;
+}
+form.page-form input {
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+}
+form.page-form input:hover {
+  border: 0;
+  background: #f6f9ff;
+}
+form.page-form #form-item-sidebar {
+  position: fixed;
+  height: auto;
+  z-index: 996;
+  transition: all 0.3s;
+  padding: 0.3rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #aab7cf transparent;
+  box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+  background-color: #fff;
+}
+
+/* Notification: toasts --------------------*/
+.polite div.toast-notification {
+  margin-top: 100px;
+}
+
+/* Search-form --------------------*/
+.header .search-form input {
+  border-radius: 5px;
+  height: 1.8rem;
+  border: 1px;
+}
+
+/* Page title with background image --------------------*/
+main .page-title-background {
+  border-radius: 5px;
+  height: 75px;
+  opacity: 20%;
+  z-index: -1;
+  position: sticky;
+}
+main .pagetitle {
+  margin-top: -65px;
+}
+
+/* Logo inside sidebar --------------------*/
+.sidebar .sidebar-logo img {
+  width: 100%;
+}
+
+/**
+* Page form
+*/
+#emojiPicker_container > div {
+  min-width: 100px;
+}
+
+/**
+* Shared pages
+*/
+#shared-pages-container div.dataTable-top {
+  margin-bottom: 1rem;
+  padding: 10px 0px;
+}
+#shared-pages-container div.dataTable-bottom > div.dataTable-info {
+  color: var(--bs-gray-600);
+}
+#shared-pages-container table.dataTable-table {
+  border-spacing: revert;
+}
+#shared-pages-container table#shared-pages-datatable > thead {
+  display: none;
+}
+#shared-pages-container input.dataTable-input {
+  padding: 3px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 30px;
+}
+#shared-pages-container table#shared-pages-datatable > tbody {
+  border: 0px;
+}
+#shared-pages-container
+  table.dataTable-table
+  > tbody
+  > tr
+  > td.dataTables-empty {
+  border: 0px;
+  color: var(--bs-secondary);
+}
+#shared-pages-container .dataTable-wrapper.no-footer .dataTable-container {
+  border-bottom: 1px solid #d9d9d9;
+}
+
+/**
+ * Disease summary form
+ */
+
+.app-btn-sm {
+  padding: 0.05rem 0.28rem;
+}

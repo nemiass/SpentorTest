@@ -1,0 +1,77 @@
+<td class="list-group border-0 w-auto h-100" style="width: 100vw;">
+    <div class="list-group-item d-flex justify-content-between align-items-center h-100 p-0">
+
+        <!-- Deck cards -->
+        <div class="d-flex align-items-center bg-light p-3 h-100">
+            <div class="card-icon d-flex align-items-center justify-content-center">
+
+                <div class="rounded-3" style="width: 60px; height: 100%; background-color: var(--bs-gray-300); opacity: 1; ">
+                </div>
+
+                <div class="d-flex flex-column" style="position: absolute;">
+                    <span class="w-100 text-center text-muted" style="font-size: 1.6rem; margin-top: 1rem;">
+                        {{ deck.card_set.count }}
+                    </span>
+                    <span class="mt-3 w-100 text-center text-muted" style="font-size: .6rem;">
+                        <i class="bi bi-suit-club-fill"></i> cards
+                    </span>
+                </div>
+
+            </div>
+        </div><!-- End Deck cards -->
+
+        <!-- Deck detail -->
+        <div class="p-3 me-auto">
+
+            <!-- Deck name -->
+            <h6 class="mb-1" style="font-sizes: 1rem;">
+                <a href="{% url 'evaluation:deck-community-detail' deck.id 'd' %}" type="button" class="text-reset" title="{{ deck.deck_name }}" target="_blank" rel="noopener noreferrer">
+                    {{ deck.deck_name|truncatechars:30 }}
+                </a>
+            </h6><!-- End Deck name -->
+
+            <!-- Deck description -->
+            {% if deck.description %}
+                <p class="mb-1 text-secondary lh-sm" style="font-size: .8rem;">
+                    {{ deck.description|truncatechars:65 }}
+                </p>
+            {% endif %}<!-- End Deck description -->
+
+            <!-- Deck owner -->
+            <small class="text-muted">
+                <i class="bi bi-dash-lg"></i>
+                <span class="badge bg-primary">
+                    @{{ deck.owner }}
+                </span>
+            </small><!-- End Deck owner -->
+
+        </div><!-- End Deck detail -->
+
+        <!-- Deck options -->
+        <div class="mb-auto p-3 ps-0">
+            <form action="{% url 'evaluation:deck-community-pin' deck.id %}" method="post">
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-sm p-0">
+                    {% with user.boarddeck_set.all as user_boards %}
+
+                        {% if user_boards.count > 0 %}
+
+                            {% if deck in user_boards.first.decks.all %}
+                                <i class="bi bi-pin-angle-fill text-muted"></i>
+                            {% else %}
+                                <i class="bi bi-pin-angle text-muted"></i>
+                            {% endif %}
+
+                        {% else %}
+                            <i class="bi bi-pin-angle text-muted"></i>
+                        {% endif %}
+
+                    {% endwith %}
+                </button>
+
+            </form>
+        </div><!-- End Deck options -->
+
+    </div>
+</td>

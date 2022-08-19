@@ -1,0 +1,532 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    {% if deck.owner == user %}
+
+        <!-- Confirmation test messages -->
+        {% if messages %}
+            {% for message in messages %}
+
+                {% if message.tags == 'creation_test_error error' or message.tags == 'creation_card_error error' %}
+                    <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                {% else %}
+                    <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                        <i class="bi bi-info-circle-fill"></i>
+
+                {% endif %}
+                        <div class="ps-2">
+                            <h6 class="m-0">{{ message }}</h6>
+                            <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                    </div><!-- End Confirmation test messages -->
+            {% endfor %}
+        {% endif %}
+
+    {% endif %}
+{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+
+        {% if from_community is not None %}
+            {% if from_community == 'from_deck_community' %}
+                <!-- Deck community -->
+                <li class="breadcrumb-item">
+                    <a href="{% url 'evaluation:deck-community' %}" class="text-reset" title="Deck community">
+                        Deck community
+                    </a>
+                </li><!-- End Deck community -->
+            {% elif from_community == 'not_defined' %}
+                <li class="breadcrumb-item">
+                    <a class="text-reset">
+                        ...
+                    </a>
+                </li>
+            {% endif %}
+        {% else %}
+            <!-- Deck list -->
+            <li class="breadcrumb-item">
+                <a href="{% url 'evaluation:deck-list' %}" class="text-reset" title="Deck list">
+                    Deck list
+                </a>
+            </li><!-- End Deck list -->
+
+        {% endif %}
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item active">
+            {{ deck.deck_name|truncatewords:5 }}
+        </li><!-- End Deck title -->
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block test_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- ======= EVALUATION Left side ======= -->
+            <div class="col-lg-3">
+
+                <!-- Card graph -->
+                <div class="card pb-4">
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">
+                            {% if deck.owner == user %}
+                                Card graph
+                            {% else %}
+                                About owner
+                            {% endif %}
+                        </h5>
+
+                        {% if deck.owner == user %}
+
+                            {% if deck.card_set.count > 0 %}
+
+                                <!-- Polar Area Chart -->
+                                <div id="testPolar-{{ deck.id }}"></div>
+
+                                <script>
+
+                                    document.addEventListener("DOMContentLoaded", () => {
+                                        new ApexCharts(document.querySelector("#testPolar-{{ deck.id }}"), {
+                                            series: [{{ deck.new_card }}, {{ deck.learning_card }}, {{ deck.review_card }}],
+                                            chart: {
+                                                type: 'polarArea',
+                                                height: 350,
+                                                toolbar: {
+                                                    show: false
+                                                }
+                                            },
+                                            labels: ['{{ card_status.0 }}', '{{ card_status.1 }}', '{{ card_status.2 }}'],
+                                            colors:['#0d6efd', '#6c757d', '#ffc107'],
+                                            fill: {
+                                                opacity: 0.8
+                                            },
+                                            stroke: {
+                                              colors: ['#fff']
+                                            },
+                                            legend: {
+                                                position: 'bottom'
+                                            }
+                                        }).render();
+                                    });
+
+                                </script><!-- End Polar Area Chart -->
+
+                            {% else %}
+                                <div class="row mb-3 text-center">
+
+                                    <div class="col-12 | text-muted mt-4">
+                                        <span style="font-size: 5rem;">👀️</span>
+                                        <h6 class="py-2 mb-1">
+                                            <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                        </h6>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted">
+                                    <span style="font-size: 5rem;"><i class="bi bi-person-circle"></i></span>
+                                    <h6 class="pt-2 mb-1">
+                                        {{ deck.owner.get_full_name }}
+                                    </h6>
+                                    <h6 class="pb-2 mb-1">
+                                        <span class="badge bg-primary">@{{ deck.owner.get_username }}</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div><!-- End Card graph -->
+
+            </div><!-- End EVALUATION Left side -->
+
+            <!-- ======= EVALUATION Right side ======= -->
+            <div class="col-lg-9">
+                <div class="col-12">
+
+                    <!-- Deck detail -->
+                    <div class="card">
+
+                        {% if user_access.permission == '2' %}
+                            <!-- Modal confirm deletion -->
+                            {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='evaluation:deck-delete' model_id=deck.id forloop_counter=0 only %}
+                            <!-- End Modal confirm deletion -->
+
+                            <!-- Deck options -->
+                            <div class="filter me-3">
+
+                                <div class="d-flex">
+                                    <a type="button" class="text-reset" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <!-- Deck share  -->
+                                        <li>
+                                            <a class="dropdown-item | py-1 d-flex align-items-center" type="button">
+                                                <i class="bi bi-share-fill" style="font-size: 0.8rem;"></i>&nbsp
+
+                                                <form action="{% url 'evaluation:deck-share' deck.id %}" method="post" class="d-flex">
+                                                    {% csrf_token %}
+
+                                                    {% if deck.type == '0' %}
+                                                        <input type="hidden" name="source_template" value="from_deck_detail">
+                                                    {% endif %}
+
+                                                    <button type="submit" class="btn btn-sm p-0">Share</button>
+
+                                                    <div class="form-check form-switch">
+                                                        {% if deck.is_shared == True %}
+                                                        <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck" checked>
+                                                        {% else %}
+                                                        <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck">
+                                                        {% endif %}
+                                                    </div>
+                                                </form>
+                                            </a>
+                                        </li><!-- End Deck share  -->
+
+                                        <!-- Deck update  -->
+                                        <li> <!-- FIXME: Redirect to page detail or deck detail? -->
+                                            {% if deck.type == '0' %}
+                                                <a href="{% url 'evaluation:deck-upsert' deck.page.id %}" class="dropdown-item py-1" type="button">
+                                                    <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                                                    <span>Update</span>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'evaluation:deck-customized-update' deck.id %}" class="dropdown-item py-1" type="button">
+                                                    <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                                                    <span>Update</span>
+                                                </a>
+                                            {% endif %}
+
+                                        </li><!-- End Deck update  -->
+
+                                        <!-- Button trigger modal -->
+                                        <li>
+                                            <a class="dropdown-item | py-0 pt-1 text-danger" type="button" data-bs-toggle="modal"
+                                            data-bs-target="#modalConfirmDelete-0">
+
+                                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                                                <span>Delete</span>
+                                            </a>
+                                        </li><!-- End Button trigger modal -->
+                                    </ul>
+                                </div>
+                            </div><!-- End Deck options -->
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Deck detail
+                                <span>| <span style="font-size: 0.75rem;"><i>Updated on {{ deck.updated_at|date:"M d, Y" }}</i></span></span>
+                            </h5>
+
+                            <!-- Deck detail -->
+                            <div class="row g-0 mb-3">
+
+                                <div class="col-sm-8 mx-auto">
+
+                                    <!-- Deck name -->
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 text-muted">Name</label>
+
+                                        <div class="col-sm-10">
+                                            <span>{{ deck.deck_name }}</span>
+                                        </div>
+                                    </div><!-- End Deck name -->
+
+                                    <!-- Deck type -->
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 text-muted">Type</label>
+
+                                        <div class="col-sm-10">
+                                            <span class="badge bg-secondary" style="font-size: 0.7rem;">{{ deck.get_type_display }}</span>
+                                        </div>
+                                    </div><!-- End Deck type -->
+
+                                    <!-- Deck description -->
+                                    {% if deck.description %}
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 text-muted">Detail</label>
+
+                                            <div class="col-sm-10">
+                                                <span>{{ deck.description }}</span>
+                                            </div>
+                                        </div>
+                                    {% endif %}<!-- End Deck description -->
+
+                                    {% if deck.type != '0' %}
+                                        <!-- Deck origin -->
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 text-muted">Origin</label>
+
+                                            <div class="col-sm-10">
+                                                <span class="fst-italic text-muted">
+                                                    <span style="font-size: 0.9rem;">from</span>
+
+                                                    {% for deck_parent in deck.deck_parts.all %}
+                                                        {% if deck_parent.owner == user or deck_parent.is_shared == True %}
+                                                            <a href="{% url 'evaluation:deck-detail' deck_parent.id %}" class="text-secondary">
+                                                                <u style="font-size: 0.9rem;">{{ deck_parent }}</u>
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="text-secondary" style="font-size: 0.9rem;">
+                                                                {{ deck_parent }}
+                                                            </span>
+                                                        {% endif %}
+                                                        ,
+                                                    {% endfor %}
+                                                </span>
+                                            </div><!-- End Deck origin -->
+                                        </div>
+                                    {% endif %}
+
+                                    {% if deck.owner == user %}
+                                        <!-- Deck cards -->
+                                        <fieldset class="row mb-3">
+                                            <label class="col-sm-2 text-muted">Cards</label>
+
+                                            <div class="col-sm-10">
+                                                <div class="mb-1">
+                                                    <span class="badge rounded-pill bg-primary">{{ deck.new_card }}</span>
+                                                    <span class="text-primary" style="font-size: 0.9rem;">{{ card_status.0 }}</span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <span class="badge rounded-pill bg-secondary">{{ deck.learning_card }}</span>
+                                                    <span class="text-secondary" style="font-size: 0.9rem;">{{ card_status.1 }}</span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <span class="badge rounded-pill bg-warning">{{ deck.review_card }}</span>
+                                                    <span class="text-warning" style="font-size: 0.9rem;">{{ card_status.2 }}</span>
+                                                </div>
+                                            </div>
+                                        </fieldset><!-- End Deck cards -->
+                                    {% endif %}
+
+                                    {% if deck.owner == user %}
+                                        <!-- Deck test -->
+                                        {% if deck.card_set.count > 0 %}
+
+                                            <div class="row mb-3">
+                                                <div class="col-sm-10 ms-auto d-flex">
+
+                                                    <!-- Add or start again -->
+                                                    {% if active_test is False %}
+                                                        <form action="{% url 'evaluation:test-create' deck.id %}" method="post">
+                                                            {% csrf_token %}
+
+                                                            {% if deck.new_card == 0 %}
+
+                                                                <button class="btn btn-primary btn-sm me-3" type="submit">
+                                                                    <i class="bi bi-arrow-repeat"></i>
+                                                                    <span>Start again</span>
+                                                                </button>
+
+                                                            {% else %}
+
+                                                                <button class="btn btn-secondary btn-sm me-3" type="submit">
+                                                                    <i class="bi bi-plus-circle-fill"></i>
+                                                                    <span>Add test</span>
+                                                                </button>
+
+                                                            {% endif %}<!-- End Add or start again -->
+                                                        </form>
+                                                    {% endif %}<!-- End Add or start again -->
+
+                                                    <!-- Active test -->
+                                                    {% if active_test is not False %}
+                                                        <a href="{% url 'evaluation:test-detail' active_test.id %}" class="btn btn-outline-primary btn-sm me-3" type="button">
+                                                            <i class="bi bi-calendar-event"></i>
+                                                            <span>Go active test</span>
+                                                        </a>
+                                                    {% endif %}<!-- End Active test -->
+
+                                                    <!-- Test history -->
+                                                    {% if deck.test_set.count > 0 %}
+                                                        <a href="{% url 'evaluation:test-list' deck.id %}" class="btn btn-outline-secondary btn-sm" type="button">
+                                                            <i class="bi bi-clock-history"></i>
+                                                            <span>View test history</span>
+                                                        </a>
+                                                    {% endif %}<!-- End Test history -->
+
+                                                </div>
+                                            </div>
+
+                                        {% endif %}<!-- End Deck test -->
+                                    {% endif %}
+
+                                </div>
+
+                            </div><!-- End Deck detail -->
+                        </div>
+
+                    </div><!-- End Deck detail -->
+
+                    <!-- Deck cards -->
+                    <div class="card">
+
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Card list
+                                <span>| <span style="font-size: 0.75rem;"><i>With <b>{{ deck.card_set.count }}</b> cards</i></span></span>
+                            </h5>
+
+                            <!-- Card items -->
+                            <div class="row g-0 mb-3">
+
+                                {% if deck.card_set.count > 0 %}
+                                    <div class="col-sm-12">
+                                        <div class="accordion accordion-flush_not" id="card-item-accordion-1">
+
+                                            {% for card in deck.card_set.all %}
+
+                                                <!-- Accordion card item -->
+                                                <div class="accordion-item">
+
+                                                    <!-- Card header -->
+                                                    <h2 class="accordion-header" id="card-item-header-{{ forloop.counter }}">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#card-item-{{ forloop.counter }}" aria-expanded="false" aria-controls="card-item-{{ forloop.counter }}">
+                                                            <span class="w-100 d-flex">
+                                                                {% if deck.owner == user  %}
+                                                                    <div class="me-2">
+                                                                        {% if card.status == '0' %}
+                                                                        <span class="badge rounded-pill bg-primary">N</span>
+                                                                        {% elif card.status == '1' %}
+                                                                        <span class="badge rounded-pill bg-secondary">L</span>
+                                                                        {% elif card.status == '2' %}
+                                                                        <span class="badge rounded-pill bg-warning">R</span>
+                                                                        {% endif %}
+                                                                    </div>
+
+                                                                {% else %}
+                                                                    <div class="me-2">
+                                                                        <span class="badge rounded-pill bg-secondary h-auto">{{ forloop.counter }}</span>
+                                                                    </div>
+                                                                {% endif %}
+
+                                                                {{ card.front|truncatewords_html:16|safe }}
+                                                            </span>
+
+                                                            {% if user_access.permission == '2' %}
+                                                                <div class="btn-group btn-group-sm ms-auto me-2">
+                                                                    <a href="{% url 'evaluation:card-delete' card.id %}" type="button" class="btn btn-outline-danger py-0">
+                                                                        <i class="bi bi-trash" style="font-size: 0.9rem;"></i>
+                                                                    </a>
+                                                                    <a href="{% url 'evaluation:card-update' card.id %}" type="button" class="btn btn-outline-info py-0">
+                                                                        <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                                                                    </a>
+                                                                </div>
+                                                            {% endif %}
+                                                        </button>
+                                                    </h2><!-- End Card header -->
+
+                                                    <!-- Card body -->
+                                                    <div id="card-item-{{ forloop.counter }}" class="accordion-collapse collapse border-top" aria-labelledby="card-item-header-{{ forloop.counter }}" data-bs-parent="#card-item-accordion-1">
+                                                        <div class="accordion-body ms-5 p-3">
+
+                                                            <div class="row mb-1">
+                                                                <div class="col-sm-2">
+                                                                    <i class="bi bi-question-lg"></i>
+                                                                    <strong>Question</strong>
+                                                                </div>
+
+                                                                <div class="col-sm-10">
+                                                                    {{ card.front|safe }}
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row mb-1">
+                                                                <div class="col-sm-2">
+                                                                    <i class="bi bi-check-all"></i>
+                                                                    <strong>Answer</strong>
+                                                                </div>
+
+                                                                <div class="col-sm-10">
+                                                                    {{ card.back|safe }}
+                                                                </div>
+                                                            </div>
+
+                                                            {% if card.extra_info %}
+                                                            <div class="row mb-1">
+                                                                <div class="col-sm-2">
+                                                                    <i class="bi bi-info-lg"></i>
+                                                                    <strong>Extra info</strong>
+                                                                </div>
+
+                                                                <div class="col-sm-10">
+                                                                    {{ card.extra_info|safe }}
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+
+                                                        </div>
+                                                    </div><!-- End Card body -->
+
+                                                </div><!-- End Accordion card item -->
+
+                                            {% endfor %}
+
+                                        </div>
+                                    </div>
+
+                                    {% if user_access.permission == '2' %}
+                                        <div class="col-sm-12 text-center mt-2">
+                                            <a href="{% url 'evaluation:card-create' deck.id %}" type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-file-earmark-plus"></i>
+                                                Add card
+                                            </a>
+                                        </div>
+                                    {% endif %}
+
+                                {% else %}
+
+                                    {% if user_access.permission == '2' %}
+                                        <div class="col-sm-12 | text-muted text-center">
+                                            <a href="{% url 'evaluation:card-create' deck.id %}" class="text-reset" style="font-size: 5rem;">
+                                                <i class="bi bi-file-earmark-plus"></i>
+                                            </a>
+                                            <h5 class="text-muted py-2 mb-1">Add some cards!</h5>
+                                        </div>
+
+                                    {% else %}
+                                        <div class="col-sm-12 | text-muted text-center">
+                                            <span style="font-size: 5rem;">👀️</span>
+                                            <h6 class="py-2 mb-1">
+                                                <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                            </h6>
+                                        </div>
+                                    {% endif %}
+
+                                {% endif %}
+
+                            </div><!-- End Card items -->
+
+                        </div>
+
+                    </div><!-- End Deck cards -->
+
+                </div>
+            </div><!-- End Right side -->
+
+        </div>
+    </section>
+{% endblock test_section %}

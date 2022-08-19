@@ -1,0 +1,31 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|title }} {% endblock page_title %}
+
+{% block page_section %}
+        <div class="row">
+            <div class="col-lg-12 pb-3 mx-auto">
+                <div class="card card-form">
+                    <div class="card-body col-lg-10 mx-auto mt-3">
+                        <!-- Tag property form -->
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ formset.management_form }}
+                            {% for form in formset %}
+                                {{ form.as_p }}
+                            {% endfor %}
+
+                            <div class="row mb-3">
+                                <div class="col-sm-12 text-center">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                            <br>
+                        </form><!-- End Tag property form -->
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock page_section %}

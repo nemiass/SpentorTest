@@ -1,0 +1,81 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_section %}
+<!-- Search results -->
+    <div class="row">
+        <div class="col-lg-12 pb-3 mx-auto">
+            {% if search_keyword %}
+            <div class="card card-form">
+                <div class="card-header">
+                    You've looked for <span class="fs-5 text-secondary fst-italic">{{ search_keyword }}</span>
+                </div>
+
+                <div class="container">
+                    <div class="card-body mt-3">
+                        <div class="row table-responsive | my-3 mx-auto">
+                            {% if searched_page %}
+                            <table class="table | table-hover table-sm" style="font-size: 0.9rem;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" class="text-center">Actions</th>
+                                        <th scope="col" class="col-sm-4">Name</th>
+                                        <th scope="col">Tags</th>
+                                        <th scope="col" class="col-sm-3">Last update</th>
+                                    </tr>
+                                </thead>
+    <!-- Search items -->
+                                <tbody>
+                                {% for page in searched_page %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <a href="{% url 'a01_note:page-detail' page.id %}" type="button" class="btn | btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            <span>
+                                            {% if page.emoji %}
+                                                {{ page.emoji }}
+                                            {% endif %}
+                                            </span>
+                                            {{ page.page_name }}
+                                        </td>
+
+                                        <td style="font-size: auto;">
+                                        {% for tag in page.tag_set.all %}
+                                            <span class="badge bg-primary">
+                                                <a href="#" class="text-reset">{{ tag.tag_name }}</a>&nbsp
+                                            </span>
+                                        {% empty %}
+                                            <i>Add your tags inside...</i>
+                                        {% endfor %}
+                                        </td>
+
+                                        <td>
+                                            {{ page.updated_at|date:"M d Y, \a\t h:i A" }}
+                                        </td>
+
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table><!-- End Search items -->
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center" role="alert">
+                It seems you haven't introduced anything...😬️
+            </div>
+            {% endif %}
+        </div>
+    </div><!-- End Search results-->
+{% endblock page_section %}

@@ -1,0 +1,134 @@
+{% extends "master/base.html" %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %}
+    <div class="pt-4 pb-2">
+
+        <h5 class="card-title text-center pb-0 fs-4"> {{ page_title|title }} </h5>
+        <p class="text-center small text-muted">Enter your personal details to create account</p>
+
+        <!-- Registration messages -->
+        {% if messages %}
+            {% for message in messages %}
+
+            {% if message.tags == 'error' %}
+                <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+            {% else %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+            {% endif %}
+
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div><!-- End Registration messages -->
+            {% endfor %}
+        {% endif %}
+
+        {% if form.errors %}
+            {% for username_error in form.username.errors  %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+
+                    <i class="bi bi-info-circle-fill"></i>
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ username_error }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+            {% for password1_error in form.password1.errors  %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+
+                    <i class="bi bi-info-circle-fill"></i>
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ password1_error }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+            {% for password2_error in form.password2.errors  %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+
+                    <i class="bi bi-info-circle-fill"></i>
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ password2_error }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+
+        {% endif %}
+
+    </div>
+{% endblock page_title %}
+
+{% block auth_form %}
+    <form action="" method="post" class="row g-3 needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="col-12">
+            {{ form.username.label_tag }}
+            <div class="input-group has-validation">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                {{ form.username }}
+            </div>
+            <span class="text-muted d-block" style="font-size: 0.6rem;">{{ form.username.help_text }}</span>
+            <div class="invalid-feedback">Please choose a username.</div>
+        </div>
+
+        <div class="col-12">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+            <div class="invalid-feedback">Please, enter your name!</div>
+        </div>
+
+        <div class="col-12">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+            <div class="invalid-feedback">Please, enter your last name!</div>
+        </div>
+
+        <div class="col-12">
+            {{ form.email.label_tag }}
+            <div class="input-group has-validation">
+                <span class="input-group-text" id="inputGroupPrepend">@</span>
+                {{ form.email }}
+                <div class="invalid-feedback">Please enter a valid Email adddress!</div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            <div class="invalid-feedback">Please enter your password!</div>
+            <br>
+            <span class="text-muted mt-1" style="font-size: 0.6rem;">{{ form.password1.help_text }}</span>
+        </div>
+
+        <div class="col-12 mt-0">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            <span class="text-muted" style="font-size: 0.6rem;">{{ form.password2.help_text }}</span>
+            <div class="invalid-feedback">Please enter the same password as before!</div>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">Create Account</button>
+        </div>
+        <div class="col-12">
+            <p class="small mb-0">Already have an account? <a href="{% url 'master:login-user' %}">Log in</a></p>
+        </div>
+
+
+    </form>
+{% endblock auth_form %}

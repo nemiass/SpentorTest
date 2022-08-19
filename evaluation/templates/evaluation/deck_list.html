@@ -1,0 +1,148 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    <!-- Confirmation messages -->
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'customized_deck_error error' %}
+
+                <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {% elif message.tags == 'customized_deck_success success' %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+
+            {% endif %}
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+
+        {% endfor %}
+    {% endif %}<!-- End Confirmation messages -->
+{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+        <li class="breadcrumb-item active">Deck list</li>
+{% endblock page_breadcrumb %}
+
+
+{% block page_section %}{% endblock page_section %}
+
+{% block test_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            {% if deck_customized_list.count > 0 %}
+
+                <!-- Customized deck list -->
+                <div class="col-lg-12">
+
+                    <div class="card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                Customized decks
+                                <span>|
+                                    <span style="font-size: 0.75rem;">
+                                        <i>Total <b>{{ deck_customized_list.count }} <i class="bi bi-suit-diamond-fill"></i></b> decks</i>
+                                    </span>
+                                </span>
+                            </h5>
+
+                            {% if deck_customized_list.count > 0 %}
+
+                                <div class="activity mt-4 mb-3">
+                                    <div class="col-sm-12">
+
+                                        <ul class="list-group" id="my_custom_deck_list">
+
+                                            {% for deck_custom in deck_customized_list %}
+
+                                                <!-- List deck item -->
+                                                {% include 'evaluation/layout/list_custom_deck_item.html' with deck_custom=deck_custom only %}
+                                                <!-- End List deck item -->
+
+                                            {% endfor %}
+                                        </ul>
+
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                </div><!-- End Customized deck list -->
+            {% endif %}
+
+            <!-- Deck list -->
+            <div class="col-lg-12">
+
+                <div class="card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                My decks
+                                <span>|
+                                    <span style="font-size: 0.75rem;">
+                                        <i>Total <b>{{ object_list.count }} <i class="bi bi-suit-club-fill"></i></b> decks</i>
+                                    </span>
+                                </span>
+                            </h5>
+
+                            <form action="{% url 'evaluation:deck-customized-create' %}" method="post">
+                                {% csrf_token %}
+
+                                {% if object_list.count > 0 %}
+                                    <div class="activity">
+                                        <div class="col-sm-12 text-center">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle-fill"></i> | Create customized deck</button>
+                                        </div>
+                                    </div>
+
+                                    <br>
+                                {% endif %}
+
+                                <div class="activity mb-3">
+
+                                    <div class="col-sm-12">
+                                        <ul class="list-group" id="my_deck_list">
+
+                                            {% for page in object_list %}
+
+                                                <!-- List deck item -->
+                                                {% include 'evaluation/layout/list_deck_item.html' with page=page url_hash='#deck-detail' only %}
+                                                <!-- End List deck item -->
+
+                                            {% empty %}
+                                                <li class="list-group-item text-center border-0 bg-transparent">
+                                                    <span style="font-size: 5rem;">👀️</span>
+                                                    <h5 class="text-muted py-2 mb-1">Your deck list is empty.</h5>
+                                                </li>
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+            </div><!-- End Deck list -->
+
+        </div>
+    </section>
+{% endblock test_section %}

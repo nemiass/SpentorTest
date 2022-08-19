@@ -1,0 +1,349 @@
+    {% load static %}
+
+    <!-- ======= HOME SECTION  ======= -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'a01_note:home' %}">
+            <i class="bi bi-house-fill"></i>
+            <span>Home</span>
+        </a>
+    </li><!-- End Dashboard Nav -->
+
+    <!-- <li class="nav-item">
+        <a class="nav-link collapsed">
+            <i class="bi bi-star"></i>
+            <span>Favourites</span>
+        </a>
+    </li> -->
+    <!-- End Favourites Page Nav -->
+
+    <!-- <li class="nav-item">
+        <a class="nav-link collapsed">
+            <i class="bi bi-share-fill"></i>
+            <span>Shared pages</span>
+        </a>
+    </li> -->
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'a01_note:page-trash-list' %}">
+            <i class="bi bi-trash2-fill"></i>
+            <span>Trash</span>
+        </a>
+    </li><!-- End Trash Page Nav -->
+
+    <br>
+
+    <!-- ======= EVALUATION SECTION  ======= -->
+    <li class="nav-heading">Evaluation</li>
+
+    <!-- <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+            <i class="bi bi-plus-square-fill"></i>
+            <span>Add test</span>
+        </a>
+    </li> -->
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'evaluation:deck-list' %}">
+            <i class="bi bi-suit-club"></i>
+            <span>My decks</span>
+        </a>
+    </li>
+
+    <br>
+
+    <!-- ======= PAGE SECTION  ======= -->
+    <li class="nav-heading">Pages</li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'a01_note:page-create' %}">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Add new page</span>
+        </a>
+    </li><!-- End New page -->
+
+    {% for page in sidebar_data %}
+
+        <!-- ======= PAGE PARENT (Level == 0)  ======= --> <!-- FIXME: All page (from different user) will be shown? -->
+        <li class="nav-item table-responsive">
+
+            <!-- Children NAME -->
+            {% include "a01_note/layout/sidebar_page_item.html" with page_data=page page_level='zero' forloop_counter=forloop.counter only %}
+
+            <ul id="page-zero-{{ forloop.counter }}" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                {% if page.child_page.count > 0 %}
+
+                    {% for child_1 in page.child_page.all  %}
+                    <li class="nav-item page-children-nav">
+
+                        <!-- Children NAME -->
+                        {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_1 page_level='one' forloop_counter=forloop.counter only %}
+
+                        <!-- ======= PAGE CHILDREN (Level == 2)  ======= -->
+                        <ul id="page-one-{{ forloop.counter }}" class="nav-content collapse">
+
+                            {% if child_1.child_page.count > 0 %}
+
+                                {% for child_2 in child_1.child_page.all  %}
+                                <li class="nav-item page-children-nav">
+
+                                    <!-- Children NAME -->
+                                    {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_2 page_level='two' forloop_counter=forloop.counter only %}
+
+                                    <!-- ======= PAGE CHILDREN (Level == 3)  ======= -->
+                                    <ul id="page-two-{{ forloop.counter }}" class="nav-content collapse">
+
+                                        {% if child_2.child_page.count > 0 %}
+                                            {% for child_3 in child_2.child_page.all  %}
+                                            <li class="nav-item page-children-nav">
+
+                                                <!-- Children NAME -->
+                                                {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_3 page_level='three' forloop_counter=forloop.counter only %}
+
+
+                                                <!-- ======= PAGE CHILDREN (Level == 4)  ======= -->
+                                                <ul id="page-three-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                    {% if child_3.child_page.count > 0 %}
+                                                        {% for child_4 in child_3.child_page.all  %}
+                                                        <li class="nav-item page-children-nav">
+
+                                                            <!-- Children NAME -->
+                                                            {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_4 page_level='four' forloop_counter=forloop.counter only %}
+
+
+                                                            <!-- ======= PAGE CHILDREN (Level == 5)  ======= -->
+                                                            <ul id="page-four-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                {% if child_4.child_page.count > 0 %}
+                                                                    {% for child_5 in child_4.child_page.all  %}
+                                                                    <li class="nav-item page-children-nav">
+
+                                                                        <!-- Children NAME -->
+                                                                        {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_5 page_level='five' forloop_counter=forloop.counter only %}
+
+                                                                        <!-- ======= PAGE CHILDREN (Level == 6)  ======= -->
+                                                                        <ul id="page-five-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                            {% if child_5.child_page.count > 0 %}
+                                                                                {% for child_6 in child_5.child_page.all  %}
+                                                                                <li class="nav-item page-children-nav">
+
+                                                                                    <!-- Children NAME -->
+                                                                                    {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_6 page_level='six' forloop_counter=forloop.counter only %}
+
+
+                                                                                    <!-- ======= PAGE CHILDREN (Level == 7)  ======= -->
+                                                                                    <ul id="page-six-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                                        {% if child_6.child_page.count > 0 %}
+                                                                                            {% for child_7 in child_6.child_page.all  %}
+                                                                                            <li class="nav-item page-children-nav">
+
+                                                                                                <!-- Children NAME -->
+                                                                                                {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_7 page_level='seven' forloop_counter=forloop.counter only %}
+
+
+                                                                                                <!-- ======= PAGE CHILDREN (Level == 8)  ======= -->
+                                                                                                <ul id="page-seven-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                                                    {% if child_7.child_page.count > 0 %}
+                                                                                                        {% for child_8 in child_7.child_page.all  %}
+                                                                                                        <li class="nav-item page-children-nav">
+
+                                                                                                            <!-- Children NAME -->
+                                                                                                            {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_8 page_level='eigth' forloop_counter=forloop.counter only %}
+
+
+                                                                                                            <!-- ======= PAGE CHILDREN (Level == 9)  ======= -->
+                                                                                                            <ul id="page-eigth-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                                                                {% if child_8.child_page.count > 0 %}
+                                                                                                                    {% for child_9 in child_8.child_page.all  %}
+                                                                                                                    <li class="nav-item page-children-nav">
+
+                                                                                                                        <!-- Children NAME -->
+                                                                                                                        {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_9 page_level='nine' forloop_counter=forloop.counter only %}
+
+                                                                                                                        <!-- ======= PAGE CHILDREN (Level == 10)  ======= -->
+                                                                                                                        <ul id="page-nine-{{ forloop.counter }}" class="nav-content collapse">
+
+                                                                                                                            {% if child_9.child_page.count > 0 %}
+                                                                                                                                {% for child_10 in child_9.child_page.all  %}
+                                                                                                                                <li class="nav-item page-children-nav">
+
+                                                                                                                                    <!-- Children NAME -->
+                                                                                                                                    {% include "a01_note/layout/sidebar_page_item.html" with page_data=child_10 page_level='ten' forloop_counter=forloop.counter only %}
+
+
+                                                                                                                                    <!-- ======= PAGE CHILDREN (Level > 10): Stand-by  ======= -->
+                                                                                                                                    <ul id="page-ten-{{ forloop.counter }}" class="nav-content collapse">
+                                                                                                                                        <span id="page-overflow-msg" class="badge | rounded-pill bg-info text-dark" style="font-size: 0.7rem;">
+                                                                                                                                            Coming soon!
+                                                                                                                                        </span>
+                                                                                                                                    </ul><!-- End Page children (Level > 10) -->
+                                                                                                                                </li>
+                                                                                                                                {% endfor %}
+
+                                                                                                                            {% else %}
+                                                                                                                                <li class="ps-5">
+                                                                                                                                    <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                                                                                        No subpages
+                                                                                                                                    </span>
+                                                                                                                                </li>
+                                                                                                                            {% endif %}
+
+                                                                                                                        </ul><!-- End Page children (Level = 10) -->
+                                                                                                                    </li>
+                                                                                                                    {% endfor %}
+
+                                                                                                                {% else %}
+                                                                                                                    <li class="ps-5">
+                                                                                                                        <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                                                                            No subpages
+                                                                                                                        </span>
+                                                                                                                    </li>
+                                                                                                                {% endif %}
+
+                                                                                                            </ul><!-- End Page children (Level = 9) -->
+                                                                                                        </li>
+                                                                                                        {% endfor %}
+
+                                                                                                    {% else %}
+                                                                                                        <li class="ps-5">
+                                                                                                            <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                                                                No subpages
+                                                                                                            </span>
+                                                                                                        </li>
+                                                                                                    {% endif %}
+
+                                                                                                </ul><!-- End Page children (Level = 8) -->
+                                                                                            </li>
+                                                                                            {% endfor %}
+
+                                                                                        {% else %}
+                                                                                            <li class="ps-5">
+                                                                                                <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                                                    No subpages
+                                                                                                </span>
+                                                                                            </li>
+                                                                                        {% endif %}
+
+                                                                                    </ul><!-- End Page children (Level = 7) -->
+                                                                                </li>
+                                                                                {% endfor %}
+
+                                                                            {% else %}
+                                                                                <li class="ps-5">
+                                                                                    <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                                        No subpages
+                                                                                    </span>
+                                                                                </li>
+                                                                            {% endif %}
+
+                                                                        </ul><!-- End Page children (Level = 6) -->
+                                                                    </li>
+                                                                    {% endfor %}
+
+                                                                {% else %}
+                                                                    <li class="ps-5">
+                                                                        <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                            No subpages
+                                                                        </span>
+                                                                    </li>
+                                                                {% endif %}
+
+                                                            </ul><!-- End Page children (Level = 5) -->
+                                                        </li>
+                                                        {% endfor %}
+
+                                                    {% else %}
+                                                        <li class="ps-5">
+                                                            <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                                No subpages
+                                                            </span>
+                                                        </li>
+                                                    {% endif %}
+
+                                                </ul><!-- End Page children (Level = 4) -->
+                                            </li>
+                                            {% endfor %}
+
+                                        {% else %}
+                                            <li class="ps-5">
+                                                <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                                    No subpages
+                                                </span>
+                                            </li>
+                                        {% endif %}
+
+                                    </ul><!-- End Page children (Level = 3) -->
+                                </li>
+                                {% endfor %}
+
+                            {% else %}
+                                <li class="ps-5">
+                                    <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                                        No subpages
+                                    </span>
+                                </li>
+                            {% endif %}
+
+                        </ul><!-- End Page children (Level = 2) -->
+                    </li>
+                    {% endfor %}
+
+                {% else %}
+                    <li class="ps-5">
+                        <span class="badge rounded-pill bg-light text-muted" style="font-size: 0.7rem;">
+                            No subpages
+                        </span>
+                    </li>
+                {% endif %}
+
+            </ul><!-- End Page children (Level = 1) -->
+        </li> <!-- End Page parent (level = 0)  -->
+
+    {% endfor %}
+
+    <br>
+
+    <!-- ======= COMMUNITY SECTION  ======= -->
+    <li class="nav-heading">Community</li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'a01_note:page-community' %}">
+            <i class="bi bi-stickies"></i>
+            <!-- <span>Shared pages</span> -->
+            <span>Pages</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'evaluation:deck-community' %}">
+            <i class="bi bi-wallet2"></i>
+            <!-- <span>Shared decks</span> -->
+            <span>Decks</span>
+        </a>
+    </li>
+
+    <br>
+
+    <!-- ======= SIDEBAR LOGO  ======= -->
+    <li>
+        <div class="w-75 mx-auto">
+            <a href="{% url 'a01_note:home' %}" class="sidebar-logo d-flex w-100">
+                <img src="{% static 'img/logo_vertical.png' %}" alt="Logo" class="mx-auto">
+            </a>
+        </div>
+    </li>
+
+    <li class="mt-2">
+        <div class="d-flex w-100">
+            <a href="{% url 'master:logout-user' %}" class="btn btn-outline-secondary btn-sm mx-auto" type="button">
+                <i class="bi bi-box-arrow-left"></i>
+                <span style="font-size: 0.9rem;">Logout</span>
+            </a>
+        </div>
+    </li>
+
+    <br>

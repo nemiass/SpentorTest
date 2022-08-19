@@ -1,0 +1,294 @@
+{% extends 'a01_note/base.html' %}
+
+{% load static %}
+
+{% block css_file %}
+    <link href="{% static 'vendor/jquery-ui-1.13.2/jquery-ui.min.css' %}" rel="stylesheet">
+{% endblock css_file %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    {% if messages %}
+        {% for message in messages %}
+
+            {% if message.tags == 'disease_summary_error error' %}
+                <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {% else %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+
+            {% endif %}
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div>
+        {% endfor %}
+    {% endif %}
+{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+    <!-- Show only the current page name and its parent one -->
+    <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+    {% if page.page_parent %}
+        {% if page.level >= 1 %}
+            {% if page.level >= 2 %}
+            <li class="breadcrumb-item">...</li>
+            {% endif %}
+
+            <!-- Page parent -->
+            <li class="breadcrumb-item">
+                <a href="{% url 'a01_note:page-detail' page.page_parent.id %}" class="text-reset" title="{{ page.page_parent.page_name }}">
+                    {% if page.page_parent.emoji %} {{ page.page_parent.emoji }} {% endif %}
+                    {{ page.page_parent.page_name|truncatewords:2 }}
+                </a>
+            </li><!-- End Page parent -->
+        {% endif %}
+    {% endif %}
+
+    <li class="breadcrumb-item">
+        <a href="{% url 'a01_note:page-detail' page.id %}" class="text-reset" title="{{ page.page_name }}">
+            {% if page.emoji %} {{ page.emoji }} {% endif %}
+            {{ page.page_name|truncatewords:2 }}
+        </a>
+    </li>
+
+    <li class="breadcrumb-item active">
+        {% if disease.cie10 is not None %} Edit
+        {% else %} Add {% endif %}
+    </li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}
+    <div class="row">
+        <div class="col-lg-12 pb-3 mx-auto">
+
+            <div class="card card-form">
+                <div class="card-body col-lg-8 mx-auto p-3">
+
+                    <h5 class="card-title">
+                        Disease
+                        <span>|
+                            <span style="font-size: 0.75rem;">
+                                <i>Today <b><i class="bi bi-calendar"></i>&nbsp; {% now "M d, Y" %}</b></i>
+                            </span>
+                        </span>
+                    </h5>
+
+                    <!-- Disease summary form -->
+                    <form action="" method="post" class="mt-4">
+                        {% csrf_token %}
+
+                        {# <-- ======== Cie10 ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                <label for="ui-cie10">Cie10:</label>
+                            </label>
+                            <div class="col-sm-9">
+                                <input id="cie10" type="hidden" name="cie10"
+                                    value="{{ cie10.id|default_if_none:'' }}"
+                                    readonly
+                                >
+                                <input id="ui-cie10" class="form-control" type="text"
+                                    placeholder="Write a code for searching..."
+                                    data-cie10-endpoint="{% url 'a01_note:cie10-api-list' %}"
+                                    value="{% if cie10 %}{{ cie10.code }} ─ {{ cie10.description }}{% endif %}"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        {# <-- ======== Disease transmission mode ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.transmissionmode.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.transmissionmode }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Cause ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.cause.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.cause }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Diagnostic ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.diagnostic.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.diagnostic }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Risk factor ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.risk_factor.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.risk_factor }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Prevention ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.prevention.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.prevention }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Constraint (min & max age) ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                Age:
+                            </label>
+                            <div class="col-sm-4">
+                                <div class="form-floating">
+                                    {{ form.min_age }}
+                                    {{ form.min_age.label_tag }}
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-4">
+                                <div class="form-floating">
+                                    {{ form.max_age }}
+                                    {{ form.max_age.label_tag }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# <-- ======== Constraint (sex) ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                {{ form.sex.label_tag }}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ form.sex }}
+                            </div>
+                        </div>
+
+                        {# <-- ======== Symptom ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                <label for="ui-symptom">Symptom:</label>
+                            </label>
+                            <div class="col-sm-9">
+                                <input id="symptom" type="hidden" name="symptom"
+                                    value="{{ symptom_id_list|default_if_none:'' }}"
+                                    readonly
+                                >
+                                <input id="ui-symptom" class="form-control" type="text"
+                                    placeholder="Search..."
+                                    data-symptom-endpoint="{% url 'a01_note:symptom-api-list' %}"
+                                >
+
+                                <br>
+
+                                <ul id="symptom-list" class="list-group">
+
+                                    {% for symptom in symptom_list %}
+                                    <li class="list-group-item py-1 px-2">
+                                        <button type="button" class="btn btn-warning btn-sm me-2 app-btn-sm"
+                                            disabled
+                                        >
+                                            <i class="bi bi-trash2-fill"></i>
+                                        </button>
+                                        <span style="font-size: 14px;">
+                                            {{ symptom.description }}
+                                        </span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {# <-- ======== Treatment (Drugs) ======== --> #}
+                        <div class="row mb-4">
+                            <label class="col-sm-3" style="color: #012970;">
+                                <i class="bi bi-bug-fill"></i>&nbsp;
+                                <label for="ui-symptom">Treatment:</label>
+                            </label>
+                            <div class="col-sm-9">
+                                <input id="drug" type="hidden" name="drug"
+                                    value="{{ drug_id_list|default_if_none:'' }}"
+                                    readonly
+                                >
+                                <input id="ui-drug" class="form-control" type="text"
+                                    placeholder="Search..."
+                                    data-drug-endpoint="{% url 'a01_note:drug-api-list' %}"
+                                >
+
+                                <br>
+
+                                <ul id="drug-list" class="list-group">
+
+                                    {% for drug in drug_list %}
+                                    <li class="list-group-item py-1 px-2">
+                                        <button type="button" class="btn btn-warning btn-sm me-2 app-btn-sm"
+                                            disabled
+                                        >
+                                            <i class="bi bi-trash2-fill"></i>
+                                        </button>
+                                        <span style="font-size: 14px;">
+                                            {{ drug.name }} {{ drug.concentration }} ─ {{ drug.pharmaceutical_short_form }}
+                                        </span>
+                                    </li>
+                                    {% endfor %}
+
+                                </ul>
+                            </div>
+                        </div>
+
+
+                        {# <-- ======== Form options ======== --> #}
+                        <div class="row mb-3">
+                            <div class="col-sm-12 text-center">
+                                <a href="{% url 'a01_note:page-detail' page.id %}" type="button" class="btn btn-secondary btn-sm">
+                                    <i class="bi bi-arrow-left-circle-fill"></i> |
+                                    Go back
+                                </a>
+                                <button type="submit" class="btn btn-outline-primary btn-sm ms-4">
+                                    <i class="bi bi-plus-circle-fill"></i> |
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </form><!-- End Disease summary form -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock page_section %}
+
+{% block js_file %}
+    <script src="{% static 'vendor/jquery-ui-1.13.2/jquery-ui.min.js' %}"></script>
+{% endblock js_file %}

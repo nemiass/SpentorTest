@@ -1,0 +1,67 @@
+{% extends "master/base.html" %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %}
+    <div class="pt-4 pb-2">
+
+        <h5 class="card-title text-center pb-0 fs-4"> {{ page_title|title }} </h5>
+        <p class="text-center small text-muted">Enter your username & password to login</p>
+
+        <!-- Authentication messages -->
+        {% if messages %}
+            {% for message in messages %}
+
+            {% if message.tags == 'success' %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+
+            {% elif message.tags == 'error' %}
+                <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+            {% else %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+            {% endif %}
+
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div><!-- End Authentication messages -->
+            {% endfor %}
+        {% endif %}
+
+    </div>
+{% endblock page_title %}
+
+{% block auth_form %}
+    <form action="" method="post" class="row g-3 needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="col-12">
+            <label for="yourUsername" class="form-label">Username</label>
+            <div class="input-group has-validation">
+                <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-person-fill"></i></span>
+                <input type="text" name="username" class="form-control" id="yourUsername" required>
+                <div class="invalid-feedback">Please enter your username.</div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label for="yourPassword" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" id="yourPassword" required>
+            <div class="invalid-feedback">Please enter your password!</div>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">Login</button>
+        </div>
+        <div class="col-12">
+            <!-- {# <p class="small mb-0">
+                Don't have account? <a href="#">Create an account</a>
+            </p>#} -->
+        </div>
+    </form>
+{% endblock auth_form %}

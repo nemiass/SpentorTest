@@ -1,0 +1,40 @@
+/*--------------------------------------------------------------
+** Custom styles
+--------------------------------------------------------------*/
+/**
+* Deck list
+*/
+.dashboard #customized-deck-detail.activity .activity-item .activite-label {
+    min-width: 2rem;
+}
+/**
+* Shared pages
+*/
+#shared-decks-container div.dataTable-top {
+    margin-bottom: 1rem;
+    padding: 10px 0px;
+}
+#shared-decks-container div.dataTable-bottom > div.dataTable-info {
+    color: var(--bs-gray-600);
+}
+#shared-decks-container table.dataTable-table {
+    border-spacing: revert;
+}
+#shared-decks-container table#shared-decks-datatable > thead {
+    display: none;
+}
+#shared-decks-container input.dataTable-input {
+    padding: 3px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 30px;
+}
+#shared-decks-container table#shared-decks-datatable > tbody {
+    border: 0px;
+}
+#shared-decks-container table.dataTable-table > tbody > tr > td.dataTables-empty {
+    border: 0px;
+    color: var(--bs-secondary);
+}
+#shared-decks-container .dataTable-wrapper.no-footer .dataTable-container {
+	border-bottom: 1px solid #d9d9d9;
+}

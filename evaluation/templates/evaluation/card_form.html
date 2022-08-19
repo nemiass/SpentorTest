@@ -1,0 +1,134 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_breadcrumb %}
+    <!-- Show only the current page name and its parent one -->
+    <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+    {% if deck.type == '0' %}
+
+        <!-- Page parents -->
+        {% if deck.page.level > 0 %}
+            <li class="breadcrumb-item">...</li>
+        {% endif %}<!-- End Page parents -->
+
+        <!-- Deck's page -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'a01_note:page-detail' deck.page.id %}" class="text-reset" title="{{ deck.page.page_name }}">
+                {% if deck.page.emoji %} {{ deck.page.emoji }} {% endif %}
+                {{ deck.page.page_name|truncatewords:3 }}
+            </a>
+        </li><!-- End Deck's page -->
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'a01_note:page-detail' deck.page.id %}" class="text-reset" title="{{ deck.deck_name }}">
+                {{ deck.deck_name|truncatewords:3 }}
+            </a>
+        </li><!-- End Deck title -->
+
+    {% else %}
+        <!-- Deck list -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:deck-list' %}" class="text-reset" title="Deck list">
+                Deck list
+            </a>
+        </li><!-- End Deck list -->
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:deck-detail' deck.id %}" class="text-reset" title="{{ deck.deck_name }}">
+                {{ deck.deck_name|truncatewords:3 }}
+            </a>
+        </li><!-- End Deck title -->
+
+    {% endif %}
+
+    <!-- Card item -->
+    <li class="breadcrumb-item active d-flex">
+        {% if form.front.value %}
+            {{ form.front.value|truncatewords_html:3|safe }}
+        {% else %}
+            Add card
+        {% endif %}
+
+    </li><!-- End Card item -->
+
+{% endblock page_breadcrumb %}
+
+{% block page_section %}
+        <div class="row">
+            <div class="col-lg-12 pb-3 mx-auto">
+
+                <div class="card card-form">
+                    <div class="card-body | col-lg-8 mx-auto mt-5 p-3">
+
+                        <!-- Card form  -->
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ form.media }}
+
+                            <div class="row mb-4">
+                                <label class="col-sm-2 col-form-label text-muted">
+                                    {{ form.front.label_tag }}
+                                    <br>
+                                    <i class="bi bi-question-lg" style="font-size: 4rem;"></i>
+                                </label>
+                                <div class="col-sm-10">
+                                    {{ form.front }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <label class="col-sm-2 col-form-label text-muted">
+                                    {{ form.back.label_tag }}
+                                    <br>
+                                    <i class="bi bi-check-all text-primary" style="font-size: 4rem;"></i>
+                                </label>
+                                <div class="col-sm-10">
+                                    {{ form.back }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <label class="col-sm-2 col-form-label text-muted">
+                                    {{ form.extra_info.label_tag }}
+                                    <br>
+                                    <i class="bi bi-info-lg" style="font-size: 4rem;"></i>
+                                </label>
+                                <div class="col-sm-10">
+                                    {{ form.extra_info }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-12 text-center">
+                                    {% if deck.type == '0' %}
+                                        <a href="{% url 'a01_note:page-detail' deck.page.id %}" type="button" class="btn btn-secondary btn-sm me-3">
+                                            <i class="bi bi-arrow-left-circle-fill"></i> |
+                                            Go back
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'evaluation:deck-detail' deck.id %}" type="button" class="btn btn-secondary btn-sm me-3">
+                                            <i class="bi bi-arrow-left-circle-fill"></i> |
+                                            Go back
+                                        </a>
+                                    {% endif %}
+
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-plus-circle-fill"></i> |
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </form><!-- End Card form  -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+{% endblock page_section %}

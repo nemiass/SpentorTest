@@ -1,0 +1,326 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|capfirst }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    <!-- Confirmation messages -->
+    {% if messages %}
+        {% for message in messages %}
+
+            {% if message.tags == 'success' %}
+                <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {% else %}
+                <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+
+            {% endif %}
+                    <div class="ps-2">
+                        <h6 class="m-0">{{ message }}</h6>
+                        <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                </div><!-- End Confirmation messages -->
+        {% endfor %}
+    {% endif %}
+{% endblock page_notification %}
+
+{% block page_breadcrumb %}
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+        <!-- Deck list -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:deck-list' %}" class="text-reset" title="Deck list">
+                Deck list
+            </a>
+        </li><!-- End Deck list -->
+
+        <!-- Deck title -->
+        <li class="breadcrumb-item">
+            {% if test.deck.type == '0' %}
+                <a href="{% url 'a01_note:page-detail' test.deck.page.id %}#deck-detail" class="text-reset" title="{{ test.deck.deck_name }}">
+                    {{ test.deck.deck_name|truncatewords:3 }}
+                </a>
+            {% else %}
+                <a href="{% url 'evaluation:deck-detail' test.deck.id %}" class="text-reset" title="{{ test.deck.deck_name }}">
+                    {{ test.deck.deck_name|truncatewords:3 }}
+                </a>
+            {% endif %}
+        </li><!-- End Deck title -->
+
+        <!-- Test list -->
+        <li class="breadcrumb-item">
+            <a href="{% url 'evaluation:test-list' test.deck.id %}" class="text-reset" title="Test list">
+                Test list
+            </a>
+        </li><!-- End Test list -->
+
+        <!-- Test detail -->
+        <li class="breadcrumb-item active">
+            {{ test|truncatewords:5 }}
+        </li><!-- End Test detail -->
+
+{% endblock page_breadcrumb %}
+
+{% block page_section %}{% endblock page_section %}
+
+{% block test_section %}
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- ======= EVALUATION Left side ======= -->
+            <div class="col-lg-3">
+
+                <!-- Test stadistics -->
+                <div class="card pb-4">
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">
+                            Stadistics
+                            <span>| <span style="font-size: 0.75rem;"><i>About <b>{{ test.score_set.count }}</b> cards</i></span></span>
+                        </h5>
+
+                        {% if test.is_active == False %}
+                            <!-- Pie Chart -->
+                            <div id="testDonut-{{ test.id }}"></div>
+
+                            <script>
+
+                                document.addEventListener("DOMContentLoaded", () => {
+                                    new ApexCharts(document.querySelector("#testDonut-{{ test.id }}"), {
+                                        series: [{{ test.score_nr }}, {{ test.score_hr }}, {{ test.score_er }}],
+                                        chart: {
+                                            type: 'pie',
+                                            height: 350,
+                                            toolbar: {
+                                                show: false
+                                            }
+                                        },
+                                        labels: ['{{ score_type.NR }}', '{{ score_type.HR }}', '{{ score_type.ER }}'],
+                                        colors:['#dc3545', '#ffc107', '#0dcaf0'],
+                                        legend: {
+                                            position: 'bottom'
+                                        }
+                                    }).render();
+                                });
+
+                            </script>
+                            <!-- End Pie Chart -->
+
+                        {% else %}
+                            <div class="row mb-3 text-center">
+
+                                <div class="col-12 | text-muted mt-4">
+                                    <span style="font-size: 5rem;">👀️</span>
+                                    <h6 class="py-2 mb-1">
+                                        <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                    </h6>
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div><!-- End Test stadistics -->
+
+            </div><!-- End EVALUATION Left side -->
+
+            <!-- ======= EVALUATION Right side ======= -->
+            <div class="col-lg-9">
+
+                <!-- Test detail -->
+                <div class="col-12">
+
+                    <div class="card">
+
+                        <!--
+                        <div class="filter">
+                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                <li class="dropdown-header text-start">
+                                    <h6>Options</h6>
+                                </li>
+
+                                <li><a class="dropdown-item" href="#">Today</a></li>
+                                <li><a class="dropdown-item" href="#">This Month</a></li>
+                                <li><a class="dropdown-item" href="#">This Year</a></li>
+                            </ul>
+                        </div>
+                        -->
+
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Detail
+                                {% if test.is_active == False %}
+                                    <span>| <span style="font-size: 0.75rem;"><i>Taken on <b>{{ test.held_on }}</b></i></span></span>
+                                {% endif %}
+                            </h5>
+
+                            <div class="row g-0 mb-3">
+
+                                <div class="col-sm-8 mx-auto">
+
+                                    <!-- Deck parent -->
+                                    <div class="row mb-2">
+                                        <h6 class="col-sm-3 text-muted">From</h6>
+
+                                        <div class="col-sm-9">
+                                            {% if test.deck.type == '0' %}
+                                                <a href="{% url 'a01_note:page-detail' test.deck.page.id %}#deck-detail" class="text-secondary">
+                                                    <i class="bi bi-eye-fill"></i>
+                                                    <u style="font-size: 0.9rem;">{{ test.deck.deck_name }}</u>
+                                                </a>
+
+                                            {% else %}
+                                                <a href="{% url 'evaluation:deck-detail' test.deck.id %}" class="text-secondary">
+                                                    <i class="bi bi-eye-fill"></i>
+                                                    <u style="font-size: 0.9rem;">{{ test.deck.deck_name }}</u>
+                                                </a>
+                                            {% endif %}
+
+                                        </div>
+                                    </div><!-- End Deck parent -->
+
+                                    <!-- Test status -->
+                                    <div class="row mb-2">
+                                        <h6 class="col-sm-3 text-muted">Status</h6>
+
+                                        <div class="col-sm-9">
+                                            {% if test.is_active == True %}
+                                                <span class="badge bg-primary" style="font-size: 0.7rem;">Scheduled</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary" style="font-size: 0.7rem;">Done</span>
+                                            {% endif %}
+                                        </div>
+                                    </div><!-- End Test status -->
+
+                                    <!-- Test ordenation -->
+                                    <div class="row mb-2">
+                                        <h6 class="col-sm-3 text-muted">Sort by</h6>
+
+                                        <div class="col-sm-9">
+                                            <span style="font-size: 0.9rem;">{{ test.get_sorted_by_display }}</span>
+                                        </div>
+                                    </div><!-- End Test ordenation -->
+
+                                    <!-- Test result summary -->
+                                    {% if test.is_active == False %}
+
+                                        <div class="row mb-2 border-bottom">
+                                            <h6 class="col-sm-12 text-muted">Score summary</h6>
+                                        </div>
+
+                                        <!-- Not remembered -->
+                                        <div class="row mb-1">
+                                            <div class="col-sm-3 text-muted text-end">
+                                                <i class="bi bi-emoji-frown"></i>
+                                            </div>
+
+                                            <div class="col-sm-9 d-flex">
+                                                <span class="badge bg-danger">{{ test.score_nr }}</span>
+                                                <span class="text-muted ms-3" style="font-size: 0.8rem;">{{ score_type.NR }}</span>
+                                            </div>
+                                        </div><!-- End Not remembered -->
+
+                                        <!-- Hardly remembered -->
+                                        <div class="row mb-1">
+                                            <div class="col-sm-3 text-muted text-end">
+                                                <i class="bi bi-emoji-neutral"></i>
+                                            </div>
+
+                                            <div class="col-sm-9 d-flex">
+                                                <span class="badge bg-warning">{{ test.score_hr }}</span>
+                                                <span class="text-muted ms-3" style="font-size: 0.8rem;">{{ score_type.HR }}</span>
+                                            </div>
+                                        </div><!-- End Hardly remembered -->
+
+                                        <!-- Easily remembered -->
+                                        <div class="row mb-1">
+                                            <div class="col-sm-3 text-muted text-end">
+                                                <i class="bi bi-emoji-smile"></i>
+                                            </div>
+
+                                            <div class="col-sm-9 d-flex pb-2 border-bottom">
+                                                <span class="badge bg-info">{{ test.score_er }}</span>
+                                                <span class="text-muted ms-3" style="font-size: 0.8rem;">{{ score_type.ER }}</span>
+                                            </div>
+                                        </div><!-- End Easily remembered -->
+
+                                    {% else %}
+                                        <div class="row mb-3">
+                                            <div class="col-sm-9 ms-auto d-flex">
+                                                <a href="{% url 'evaluation:test-start' test.id %}" class="btn btn-primary btn-sm" type="button">
+                                                    <i class="bi bi-play-fill"></i>
+                                                    <span>Start</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <!-- End Test result summary -->
+
+                                    <div class="row mt-4">
+                                        <div class="col-sm-9 ms-auto">
+                                            <a href="{% url 'evaluation:test-list' test.deck.id %}" class="btn btn-secondary btn-sm" type="button">
+                                                <i class="bi bi-arrow-left-circle-fill"></i>
+                                                <span> Go test history</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- End Test detail -->
+
+                <!-- Test result -->
+                {% if test.is_active == False %}
+                    <div class="col-12">
+                        <div class="card">
+
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    Results
+                                    <span>| <span style="font-size: 0.75rem;"><i>There were <b>{{ test.score_set.count }}</b> questions</i></span></span>
+                                </h5>
+
+                                <div class="activity">
+                                    {% for score in test.score_set.all %}
+
+                                        <!-- Question (card) item -->
+                                        <div class="activity-item d-flex">
+
+                                            {% if score.score == 'NR' %}
+                                                <div class="activite-label text-center text-danger">{{ score.score }}</div>
+                                                <i class='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
+                                            {% elif score.score == 'HR' %}
+                                                <div class="activite-label text-center text-warning">{{ score.score }}</div>
+                                                <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
+                                            {% elif score.score == 'ER' %}
+                                                <div class="activite-label text-center text-info">{{ score.score }}</div>
+                                                <i class='bi bi-circle-fill activity-badge text-info align-self-start'></i>
+                                            {% endif %}
+
+                                            <div class="activity-content">
+                                                {{ score.card.front|truncatewords_html:16|safe }}
+                                            </div>
+                                        </div><!-- End Question (card) item -->
+
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                {% endif %}
+                <!-- End Test result -->
+
+            </div><!-- End Right side -->
+
+        </div>
+    </section>
+{% endblock test_section %}

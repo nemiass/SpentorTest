@@ -1,0 +1,91 @@
+{% extends 'a01_note/base.html' %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_breadcrumb %}
+    <!-- Show only the current page name and its parent one -->
+    <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+    {% if page.page_parent %}
+        {% if page.level >= 1 %}
+            {% if page.level >= 2 %}
+            <li class="breadcrumb-item">...</li>
+            {% endif %}
+
+            <!-- Page parent -->
+            <li class="breadcrumb-item">
+                <a href="{% url 'a01_note:page-detail' page.page_parent.id %}" class="text-reset" title="{{ page.page_parent.page_name }}">
+                    {% if page.page_parent.emoji %} {{ page.page_parent.emoji }} {% endif %}
+                    {{ page.page_parent.page_name|truncatewords:2 }}
+                </a>
+            </li><!-- End Page parent -->
+        {% endif %}
+    {% endif %}
+
+    <li class="breadcrumb-item">
+        <a href="{% url 'a01_note:page-detail' page.id %}" class="text-reset" title="{{ page.page_name }}">
+            {% if page.emoji %} {{ page.emoji }} {% endif %}
+            {{ page.page_name|truncatewords:2 }}
+        </a>
+    </li>
+
+    <li class="breadcrumb-item active">
+        Add text
+    </li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}
+        <div class="row">
+            <div class="col-lg-12 pb-3 mx-auto">
+
+                <div class="card card-form">
+
+                    <div class="card-body col-lg-8 mx-auto p-3">
+
+                        <h5 class="card-title">
+                            Text content
+                            <span>|
+                                <span style="font-size: 0.75rem;">
+                                    <i>Today <b><i class="bi bi-calendar"></i>&nbsp {% now "M d, Y" %}</b></i>
+                                </span>
+                            </span>
+                        </h5>
+
+                        <!-- Text content form -->
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ formset.media }}
+
+                            <div class="row mb-4">
+                                <label class="col-sm-12" style="color: #012970;">
+                                    <i class="bi bi-justify-left"></i>
+                                    {{ formset.content_text.label_tag }}
+                                </label>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-sm-12">
+                                    {{ formset.content_text }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-12 text-center">
+                                    <a href="{% url 'a01_note:page-detail' page.id %}" type="button" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-arrow-left-circle-fill"></i> |
+                                        Go back
+                                    </a>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm ms-4">
+                                        <i class="bi bi-plus-circle-fill"></i> |
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form><!-- End Text content form -->
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock page_section %}

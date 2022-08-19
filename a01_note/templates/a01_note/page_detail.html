@@ -1,0 +1,1454 @@
+{% extends 'a01_note/base.html' %}
+
+{% load static %}
+
+{% block website_title %} {{ web_title|title }} {% endblock website_title %}
+
+{% block page_title %} {{ page_title|capfirst }} {% endblock page_title %}
+
+{% block page_notification %}
+    {% if user_access.permission == '2' %}
+
+        {% if messages %}
+            {% for message in messages %}
+
+                {% if message.tags == 'creation_test_error error' or  message.tags == 'creation_card_error error' or message.tags == 'invite_user_error error' %}
+                    <div class="alert alert-warning alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                {% elif message.tags == 'invite_user_success success' or message.tags == 'remove_pageguest_success success' %}
+                    <div class="alert alert-info alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                        <i class="bi bi-check-circle-fill"></i>
+
+                {% else %}
+                    <div class="alert alert-secondary alert-dismissible fade show p-2 d-flex align-items-center" role="alert">
+                        <i class="bi bi-info-circle-fill"></i>
+
+                {% endif %}
+                        <div class="ps-2">
+                            <h6 class="m-0">{{ message }}</h6>
+                            <button type="button" class="btn-close p-2 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                    </div>
+            {% endfor %}
+        {% endif %}
+
+    {% endif %}
+{% endblock page_notification %}
+
+{% block page_cover %}
+    <!-- Page cover -->
+    {% if page.cover %}
+        <div class="page-title-background" style="background-image: url('{{ page.cover.url }}'); background-position: center; background-repeat: no-repeat;background-size: cover;">
+    {% elif page.hex_color == '#0dcaf0' %} <!-- A default value for transparency -->
+        <div class="page-title-background" style="background-color: transparent;">
+    {% else %}
+        <div class="page-title-background" style="background-color: {{ page.hex_color }}">
+    {% endif %}
+
+        </div>
+{% endblock page_cover %}
+
+{% block page_breadcrumb %}
+        <!-- Show only the current page name and its parent one -->
+        <li class="breadcrumb-item"><a href="{% url 'a01_note:home' %}">Home</a></li>
+
+        {% if user_access.role == 'owner' or user_access.role == 'superuser' %}
+
+            {% if page.page_parent %}
+                {% if page.level >= 1 %}
+                    {% if page.level >= 2 %}
+                    <li class="breadcrumb-item">...</li>
+                    {% endif %}
+
+                    <!-- Page parent -->
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'a01_note:page-detail' page.page_parent.id %}" class="text-reset" title="{{ page.page_parent.page_name }}">
+                            {% if page.page_parent.emoji %} {{ page.page_parent.emoji }} {% endif %}
+                            {{ page.page_parent.page_name|truncatewords:2 }}
+                        </a>
+                    </li><!-- End Page parent -->
+                {% endif %}
+            {% endif %}
+
+        {% elif user_access.role == 'guest' %}
+            <!-- Shared with me -->
+            <li class="breadcrumb-item">
+                <a href="#" class="text-reset">
+                    Shared with me
+                </a>
+            </li><!-- End Shared with me -->
+
+        {% elif user_access.role == 'community member' %}
+            <!-- Page community -->
+            <li class="breadcrumb-item">
+                <a href="{% url 'a01_note:page-community' %}" class="text-reset">
+                    Page community
+                </a>
+            </li><!-- End Page community -->
+        {% endif %}
+
+        <li class="breadcrumb-item active">
+            {% if page.emoji %} {{ page.emoji }} {% endif %}
+            {{ page.page_name|truncatewords:3 }}
+        </li>
+{% endblock page_breadcrumb %}
+
+{% block page_section %}
+    <div class="row">
+
+        <!-- ======= Left side (PAGE DETAIL) ======= -->
+        <div class="col-xl-3">
+
+            {% if user_access.permission == '2' %}
+                <!-- Modal confirm deletion -->
+                {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='a01_note:page-delete' model_id=page.id forloop_counter=page.id only %}
+                <!-- End Modal confirm deletion -->
+            {% endif %}
+
+            <!-- PAGE OVERVIEW -->
+            <div class="card">
+
+                <!-- Page header (for not owners) -->
+                {% if user_access.role != 'owner' %}
+                    <div class="card-header py-1 border-0 d-flex align-items-center"
+                        {% if user_access.role == 'superuser' %}
+                            style="background-color: var(--bs-indigo);"
+                        {% elif user_access.role == 'guest' %}
+                            style="background-color: var(--bs-primary);"
+                        {% elif user_access.role == 'community member' %}
+                            style="background-color: var(--bs-warning);"
+                        {% endif %}
+                    >
+
+                        <span class="badge bg-transparent">
+                            <i class="bi bi-people-fill"></i> {{ user_access.role|capfirst }}
+                        </span>
+
+                        <span class="badge ms-auto d-flex align-items-center"
+                            {% if user_access.permission == '0' %}
+                                style="background-color: #00d583;"
+                            {% elif user_access.permission == '1' %}
+                                style="background-color: var(--bs-info);"
+                            {% elif user_access.permission == '2' %}
+                                style="background-color: var(--bs-danger);"
+                            {% endif %}
+                        >
+                            <i class="bi bi-globe"></i>&nbsp
+                            {{ user_access.permission_value|capfirst }}
+
+                        </span>
+
+                    </div>
+                {% endif %}<!-- End Page header -->
+
+                <div class="card-body profile-cardp py-3 d-flex flex-column align-items-center">
+
+                    <!-- Page options -->
+                    {% if user_access.permission == '2' %}
+
+                        <!-- Clipboard toast -->
+                        <div class="position-fixed start-50 translate-middle-x p-3" style="z-index: 11; top: 50px;">
+                            <div id="clipboardToast" class="toast align-items-center bg-primary text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
+
+                                <div class="d-flex">
+                                    <div class="toast-body py-2">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span class="ms-1">Page link copied!</span>
+                                    </div>
+                                    <button type="button" class="btn text-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div><!-- End Clipboard toast -->
+
+                        <div class="container p-0 mb-1">
+
+                            <div class="row g-0">
+
+                                    <!-- Page options (LEFT SIDE) -->
+                                    <div class="col-6 d-flex align-items-center">
+
+                                        {% comment %}
+                                        <!-- Page IS_FAVOURITE -->
+                                        <div class="me-2 text-start">
+                                            {% if page.is_favourite %}
+                                                <a href="#" class="card-link text-start text-reset"><i class="bi bi-star-fill"></i></a>
+                                            {% else %}
+                                                <a href="#" class="card-link text-start text-reset"><i class="bi bi-star"></i></a>
+                                            {% endif %}
+                                        </div><!-- End Page IS_FAVOURITE -->
+                                        {% endcomment %}
+
+                                        <!-- Page share -->
+                                        <div class="">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm border-0" style="paddinge: 0.05rem 0.28rem;"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-globe"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu py-0">
+
+                                                <!-- Share to community  -->
+                                                <li>
+                                                    <div class="dropdown-item py-1 d-flex align-items-center">
+                                                        <i class="bi bi-globe" style="font-size: 0.8rem;"></i>&nbsp
+
+                                                        <form action="{% url 'a01_note:page-share' page.id %}" method="post" class="d-flex w-100">
+                                                            {% csrf_token %}
+
+                                                            <button type="submit" class="btn btn-sm p-0">Share</button>
+
+                                                            <div class="form-check form-switch ms-auto">
+
+                                                                <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared"
+                                                                {% if page.is_shared == True %}checked{% endif %}>
+
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </li><!-- End Share to community  -->
+
+                                                <li><hr class="dropdown-divider"></li>
+
+                                                <!-- Invite user  -->
+                                                <li class="bg-light py-1">
+                                                    <div class="dropdown-item py-1 d-flex align-items-center">
+
+                                                        <form action="{% url 'a01_note:page-invite' page.id %}" method="post" class="">
+                                                            {% csrf_token %}
+
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="text" class="form-control" name='username' placeholder="username" maxlength="150" required aria-label="username" aria-describedby="invite-btn">
+                                                                <button class="btn btn-outline-primary d-flex align-items-center" type="submit" id="invite-btn">
+                                                                    <i class="bi bi-person-plus-fill me-1"></i>
+                                                                    Invite
+                                                                </button>
+                                                            </div>
+
+                                                        </form>
+
+                                                    </div>
+                                                </li><!-- End Invite user  -->
+
+                                                <!-- Guest users  -->
+                                                {% for guest in page.guest_users.all %}
+                                                    <li class="bg-light">
+                                                        <div class="dropdown-item py-1 d-flex align-items-center">
+
+                                                            <!-- User image  -->
+                                                            <i class="bi bi-person-fill" style="font-size: 1rem;"></i><!-- End User image  -->
+
+                                                            <!-- User detail  -->
+                                                            <div class="ms-2 me-auto">
+                                                                <small>{{ guest.get_full_name|truncatechars:30 }}</small>
+                                                                <br>
+                                                                <span class="badge bg-primary">@{{ guest.get_username }}</span>
+                                                            </div><!-- End User detail  -->
+
+                                                            <!-- User permission  -->
+                                                            <div class="ms-2">
+
+                                                                {% for guest_access in guest.access_set.all  %}
+                                                                    {% if guest_access.page == page %}
+
+                                                                        <span class="badge d-flex align-items-center"
+                                                                            {% if guest_access.permission == '0' %}
+                                                                                style="background-color: #00d583;"
+                                                                            {% elif guest_access.permission == '1' %}
+                                                                                style="background-color: var(--bs-info);"
+                                                                            {% elif guest_access.permission == '2' %}
+                                                                                style="background-color: var(--bs-danger);"
+                                                                            {% endif %}
+                                                                        >
+                                                                            {{ guest_access.get_permission_display|capfirst }}
+
+                                                                        </span>
+
+                                                                    {% endif %}
+                                                                {% endfor %}
+
+                                                            </div><!-- End User permission  -->
+
+                                                            <!-- User actions  -->
+                                                            <div class="ms-2">
+                                                                <a href="{% url 'a01_note:page-guest-delete' page.id guest.id %}" type="button" class="btn btn-outline-danger btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-trash me-0" style="font-size: 0.75rem;"></i>
+                                                                </a>
+                                                            </div><!-- End User actions  -->
+
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}<!-- End Guest users  -->
+
+                                                <!-- Copy page link -->
+                                                {% if page_url is not None %}
+
+                                                    <li><hr class="dropdown-divider"></li>
+
+                                                    <li>
+                                                        <div class="dropdown-item py-1 d-flex">
+
+                                                            <button id="copy-pagelink" class="d-flex align-items-center btn btn-outline-secondary btn-sm ms-auto border-0" type="button" data-clipboard-text="{{ page_url }}" style="font-size: 0.8rem;">
+                                                                <i class="bi bi-link-45deg me-0"></i>&nbsp
+                                                                <span>Copy link</span>
+                                                            </button>
+
+                                                        </div>
+                                                    </li>
+
+                                                {% endif %}<!-- Copy page link -->
+
+                                            </ul>
+                                        </div><!-- End Page share  -->
+
+                                    </div><!-- End Page options -->
+
+                                    <!-- Page options (RIGHT SIDE) -->
+                                    <div class="col-6 text-end">
+                                        <div class="btn-group">
+                                            <a type="button" class="btn btn-outline-secondary btn-sm border-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots"></i>
+                                            </a>
+
+                                            <ul class="dropdown-menu dropdown-menu-end">
+
+                                                <li>
+                                                    <a href="{% url 'a01_note:page-trash' page.id %}" class="dropdown-item py-1" type="button">
+                                                        <i class="bi bi-trash2-fill" style="font-size: 0.8rem;"></i>
+                                                        <span>Move to trash</span>
+                                                    </a>
+                                                </li>
+
+                                                <li><hr class="dropdown-divider my-1"></li>
+
+                                                <!-- Button trigger modal -->
+                                                <li>
+                                                    <a class="dropdown-item | py-0 pt-1 text-danger"  type="button" data-bs-toggle="modal" data-bs-target="#modalConfirmDelete-{{ page.id }}">
+                                                        <i class="bi bi-trash text-danger" style="font-size: 0.8rem;"></i>
+                                                        <span>Delete</span>
+                                                    </a>
+                                                </li><!-- End Button trigger modal -->
+
+                                                <!-- TODO: Add created and updated date -->
+
+                                            </ul>
+                                        </div>
+                                    </div><!-- End Page options -->
+
+                            </div>
+
+                        </div>
+                    {% endif %}<!-- End Page options -->
+
+                    <!-- Page emoji -->
+                    {% if page.emoji %}
+                        <div>
+                            <a class="text-reset display-1">{{ page.emoji }}</a>
+                        </div>
+                    {% endif %}<!-- End Page emoji -->
+
+                    <!-- Page title -->
+                    <h1 class="pt-3 mb-3 lh-1 text-center" id="card-title-1">{{ page.page_name }}</h1>
+
+                    <!-- Page description -->
+                    {% if page.description %}
+                        <h6 class="text-center text-muted lh-2 py-2 mb-3" style="font-size: 0.9rem;">
+                            {{ page.description }}
+                        </h6>
+                    {% endif %}
+
+                    {% comment %}
+                    <!-- Page tags -->
+                    <h6 class="text-center lh-base">
+                        {% for tag in page.tag_set.all %}
+                            <a class="text-reset">
+                                <span class="badge bg-primary">{{ tag.tag_name }}</span>
+                            </a>&nbsp
+                        {% empty %}
+                            <span class="badge rounded-pill bg-light text-dark">Add your tags inside.</span>
+                        {% endfor %}
+                    </h6>
+                    {% endcomment %}
+
+                </div>
+
+                <!-- Page update -->
+                <div class="card-footer d-flex justify-content-center bg-light py-2">
+
+                    {% if user_access.permission == '2' %}
+                        <a href="{% url 'a01_note:page-update' page.id %}" type="button" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil-fill"></i> | Update
+                        </a>
+                    {% else %}
+                        <span class="text-muted fst-italic" style="font-size: 0.75rem;">
+                            Created by
+                        </span>
+                        <span class="badge bg-primary ms-2" style="font-size: 0.6rem;">
+                            @{{ page.owner }}
+                        </span>
+                    {% endif %}
+
+                </div><!-- End Page update -->
+
+            </div><!-- End PAGE OVERVIEW -->
+
+            {% comment %}
+            <!-- PAGE PROPERTIES -->
+            <div class="card">
+                <div class="card-header container | py-2 bg-light text-muted">
+                    <div class="row g-0">
+                        <div class="col-6 | text-start my-auto text-muted">
+                            Properties
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="{% url 'a01_note:property-create' page.id %}" type="button" class="btn btn-secondary | btn-sm">
+                                <i class="bi bi-plus-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body col-lg-10 | mt-3 w-100">
+                    {% for property in page.pageproperty_set.all %}
+                        {% if property.property_type.type_name != 'Webmark' %}
+
+                        <div class="row mb-3 gx-5">
+
+                            <!-- Propety type options -->
+                            <div class="col-sm-1">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                    <ul class="dropdown-menu | p-2" style="font-size: 1rem;">
+                                        <li style="font-size: 0.8rem;">
+                                            <a href="{% url 'a01_note:property-update' property.id %}" type="button" class="text-reset"><i class="bi bi-pencil-square"></i> Update</a>
+                                        </li>
+                                        <li style="font-size: 0.8rem;"><!-- FIXME: Add a confirmation message before delete property (using a modal and toast)-->
+                                            <a href="{% url 'a01_note:property-delete' property.id %}" type="button" class="text-danger"><i class="bi bi-trash"></i> Delete</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div><!-- End Propety type options -->
+
+                            <!-- Propety type -->
+                            <div class="col-sm-10 | text-start">
+                                {#{ property.order_number }#}
+                                <span class="text-info fw-bold" style="font-size: 0.8rem">[{{ property.property_type.type_name }}]
+                                </span>
+                                {{ property.property_name }}
+                            </div><!-- End Propety type -->
+
+                        </div>
+
+                        <!-- Propety items -->
+                        <div class="row mb-3">
+                            <!-- Evaluate each kinda property in order to show their items -->
+                            {% if property.property_type.type_name == 'Tag' %} <!-- Evaluate tag property -->
+
+                            <div class="col-sm-1 | my-auto">
+                                <a href="{% url 'a01_note:tag-property-form' property.id property.page_parent.id %}" class="text-primary"><i class="bi bi-plus-lg"></i></a>
+                            </div>
+
+                            <div class="col-sm-10 | text-start" style="font-size: 0.8rem;">
+                                {% if property.tag_set.count > 0 %}
+                                    {% for tag in property.tag_set.all %}
+                                        {{ tag.tag_name }},
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            {% endif %}
+                        </div><!-- End Propety items -->
+
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- <div class="card-footer text-muted">
+                    2 days ago
+                </div> -->
+            </div><!-- PAGE PROPERTIES -->
+            {% endcomment %}
+
+            <!-- PAGE PROPERTY: Webmark -->
+            <div class="card" id="list-webmark-property">
+
+                <!-- Webmark options -->
+                <div class="card-header py-2 bg-light">
+                    <div class="row g-0">
+
+                        <div class="col-10 | text-start my-auto text-muted" style="font-size: 0.9rem;">
+                            <i class="bi bi-bookmark-check-fill"></i>&nbsp; Bibliography
+                        </div>
+
+                        {% if user_access.permission == '2' %}
+                            <div class="col-2 text-end">
+                                <a href="{% url 'a01_note:webmark-property-create' page.id %}" type="button" class="btn btn-outline-primary btn-sm"
+                                style="padding: 0.05rem 0.28rem;" title="Add bibliography">
+                                <i class="bi bi-plus-circle"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div><!-- End Webmark options -->
+
+                <!-- Webmark items -->
+                <div class="card-body mt-3 w-100">
+
+                    {% for webmark in page.webmarkproperty_set.all %}
+                        <div class="d-flex mb-3">
+
+                            <!-- Webmark item options -->
+                            <div class="me-2">
+
+                                {% if user_access.permission == '2' %}
+                                    <div class="btn-group | dropstart dropup">
+
+                                        <button class="border-0 bg-transparent text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu | p-2" style="font-size: 1rem;">
+                                            <li class="my-1" style="font-size: 0.9rem;">
+                                                <a href="{% url 'a01_note:webmark-property-update' webmark.id %}" type="button" class="text-reset">
+                                                    <i class="bi bi-pencil-square"></i> Update
+                                                </a>
+                                            </li>
+
+                                            <li><hr class="dropdown-divider my-1"></li>
+
+                                            <li class="my-1" style="font-size: 0.9rem;">
+                                                <a href="{% url 'a01_note:webmark-property-delete' webmark.id %}" type="button" class="text-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                {% else %}
+
+                                    {% if webmark.webmark_url %}
+                                        <i class="bi bi-link-45deg"></i>
+                                    {% else %}
+                                        <i class="bi bi-justify-left"></i>
+                                    {% endif %}
+
+                                {% endif %}
+
+                            </div><!-- End Webmark item options -->
+
+                            <!-- Webmark item -->
+                            <div class="text-start my-auto" style="font-size: 0.8rem;">
+
+                                {% if webmark.webmark_url %}
+                                    <a href="{{ webmark.webmark_url }}" class="link-primary" target="_blank" rel="noopener noreferrer">
+                                        {{ webmark.webmark_name }}
+                                        <i class="bi bi-link-45deg"></i>
+                                    </a>
+                                {% else %}
+                                    <a class="text-muted">
+                                        {{ webmark.webmark_name }}
+                                    </a>
+                                {% endif %}
+
+                            </div><!-- End Webmark item -->
+
+                        </div>
+                    {% empty %}
+
+                        <div class="row mb-3 text-center">
+
+                            <div class="col-12 | text-muted mt-4">
+                                <span style="font-size: 5rem;">👀️</span>
+                                <h6 class="py-2 mb-1">
+                                    <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                </h6>
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+                </div><!-- End Webmark items -->
+
+            </div><!-- PAGE PROPERTY: Webmark -->
+
+            <!-- PAGE SUMMARY -->
+            <div class="card" id="list-webmark-property">
+
+                <!-- Summary options -->
+                <div class="card-header py-2 bg-light">
+                    <div class="row g-0">
+
+                        <div class="col-10 | text-start my-auto text-muted" style="font-size: 0.9rem;">
+                            <i class="bi bi-bug-fill"></i>&nbsp; Summary
+                            <span style="font-size: 0.8rem;"><i>for Diseases</i></span>
+                        </div>
+
+                        {% if user_access.permission == '2' %}
+                        <div class="col-2 text-end">
+                            <form method="POST" action="{% url 'a01_note:page-summary-create' page.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="summary_type" value="0">
+
+                                <button type="submit" class="btn btn-outline-primary btn-sm"
+                                    style="padding: 0.05rem 0.28rem;">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div><!-- End Summary options -->
+
+                <!-- Summary items -->
+                <div class="card-body mt-3 w-100">
+
+                    {% for summary in page.summary_set.all %}
+                        <div class="d-flex mb-3">
+                            <!-- Summary item options -->
+                            <div class="me-2">
+
+                                {% if user_access.permission == '2' %}
+                                    <div class="btn-group dropstart dropup">
+
+                                        <button class="border-0 bg-transparent text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu p-2" style="font-size: 1rem;">
+                                            <li class="my-1" style="font-size: 0.9rem;">
+                                                <a href="{% url 'a01_note:disease-summary-upsert' summary.id %}" type="button" class="text-reset">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                    {# cie10.code is only used as a validator parameter #}
+                                                    {% if summary.disease.cie10.code != "" %} Update
+                                                    {% else %} Add details {% endif %}
+                                                </a>
+                                            </li>
+
+                                            <li><hr class="dropdown-divider my-1"></li>
+
+                                            <li class="my-1" style="font-size: 0.9rem;">
+                                                <a href="{% url 'a01_note:page-summary-delete' summary.id %}" type="button" class="text-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                {% else %}
+                                    <i class="bi bi-bug text-muted"></i>
+                                {% endif %}
+
+                            </div><!-- End Summary item options -->
+
+                            <!-- Summary item -->
+                            <div class="text-start my-auto" style="font-size: 0.8rem;">
+
+                                {% if summary.summary_type == "0" %}
+
+                                    {% if summary.disease.cie10.code != "" %}
+                                        <a class="link-primary" data-bs-toggle="modal"
+                                            href="#modalDiseaseSummary-{{ forloop.counter }}"
+                                            role="button"
+                                        >
+                                            {{ summary.get_summary_type_display }} &mdash; {{ summary.disease.cie10.code }}
+                                        </a>
+                                    {% else %}
+                                        <a class="text-muted">
+                                            {{ summary.get_summary_type_display }}
+                                        </a>
+                                    {% endif %}
+
+                                {% else %}
+                                    {# TODO: List new types of page's summary #}
+                                    <a class="text-muted">
+                                        Not specified
+                                    </a>
+                                {% endif %}
+
+                            </div><!-- End Summary item -->
+                        </div>
+                    {% empty %}
+
+                        <div class="row mb-3 text-center">
+
+                            <div class="col-12 | text-muted mt-4">
+                                <span style="font-size: 5rem;">♨</span>
+                                <h6 class="py-2 mb-1">
+                                    <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                </h6>
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+                </div><!-- End Summary items -->
+
+            </div><!-- PAGE SUMMARY -->
+        </div>
+
+        <!-- ======= Right side (PAGE DETAIL) ======= -->
+        <div class="col-xl-9">
+
+            <div class="card">
+                <div class="card-body pt-3">
+
+                    <!-- Content Tabs -->
+                    <ul id="page-nav-tab" class="nav nav-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pagecontent-detail">Content</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#children-list">Children</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#deck-detail">Deck</button>
+                        </li>
+                    </ul><!-- End Content Tabs -->
+
+                    <div id="page-tab-pane" class="tab-content m-2 pt-3">
+
+                        <!-- Tab for page contents -->
+                        <div class="tab-pane fade show active" id="pagecontent-detail">
+
+                            <!-- Content options -->
+                            <div class="row g-0 border-bottom mb-3 pb-1">
+
+                                <div class="col-6 | text-start my-auto text-muted">
+                                    <h6>Content data</h6>
+                                </div>
+
+                                {% if user_access.permission == '2' %}
+                                    <div class="col-6 text-end">
+                                        <a href="{% url 'a01_note:block-index-create' page.id %}" type="button" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-plus-circle-fill"></i> |
+                                            Add content
+                                        </a>
+                                    </div>
+                                {% endif %}
+
+                            </div><!-- End Content options -->
+
+                            <!-- Content -->
+                            {% for block in page.blockindex_set.all %}
+
+                                <!-- Block item -->
+                                <div id="pagecontent-item-form">
+                                    <div class="row g-0 mb-3 ms-0 form-item">
+
+                                        <!-- Block options -->
+                                        {% if user_access.permission == '2' %}
+                                            <label class="col-sm-1 my-col-form-label d-flex justify-content-center px-auto">
+
+                                                {% comment %}
+                                                <!-- Item settings (Content type) -->
+                                                <div class="btn-group dropstart mx-auto">
+
+                                                    <a href="" class="text-reset pagecontent-btnadd-form" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></a>
+
+                                                    <ul class="dropdown-menu" id="form-item-sidebar">
+                                                        <li class="mt-1">
+                                                            <i class="dropdown-item py-1" style="font-size: 0.8rem; color: #012970">
+                                                                <span>Properties</span>
+                                                            </i>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-tags-fill" style="font-size: 0.8rem;"></i>
+                                                                <span>Tag</span>
+                                                            </a>
+                                                        </li>
+
+                                                        <li class="mt-1">
+                                                            <i class="dropdown-item py-1" style="font-size: 0.8rem; color: #012970">
+                                                                <span>Content</span>
+                                                            </i>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-list-ul" style="font-size: 0.8rem;"></i>
+                                                                <span>Text</span>
+                                                            </a>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-images" style="font-size: 0.8rem;"></i>
+                                                                <span>Image</span>
+                                                            </a>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-file-earmark-check-fill" style="font-size: 0.8rem;"></i>
+                                                                <span>File</span>
+                                                            </a>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-link" style="font-size: 0.8rem;"></i>
+                                                                <span>Webmark</span>
+                                                            </a>
+                                                        </li>
+
+                                                        <li>
+                                                            <i class="dropdown-item py-1" style="font-size: 0.8rem; color: #012970">
+                                                                <span>More pages</span>
+                                                            </i>
+                                                        </li>
+
+                                                        <li>
+                                                            <a class="dropdown-item py-1" href="#">
+                                                                <i class="bi bi-stickies-fill" style="font-size: 0.8rem;"></i>
+                                                                <span>Children</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+
+                                                </div><!-- Item settings -->
+                                                {% endcomment %}
+
+                                                <!-- Item delete -->
+                                                <a href="{% url 'a01_note:block-index-delete' block.id %}" class="btn btn-outline-danger btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem; height: fit-content;">
+                                                    <i class="bi bi-trash"></i>
+                                                </a><!-- End Item delete -->
+                                                <!-- TODO: Django remove the file from the DB but not from the server -->
+
+                                            </label>
+                                        {% endif %}<!-- End Block options -->
+
+                                        <!-- Block content -->
+                                        <div class="col {% if user_access.permission == '2' %}col-sm-11{% endif %}">
+
+                                            <!-- Block type -->
+                                            <span class="badge rounded-pill bg-primary" style="font-size: 0.6rem;">
+                                                {% if block.blocktype.type_name == 'Text' %}
+                                                    <i class="bi bi-justify-left"></i>&nbsp
+                                                {% elif block.blocktype.type_name == 'Image' %}
+                                                    <i class="bi bi-image"></i>&nbsp
+                                                {% elif block.blocktype.type_name == 'File' %}
+                                                    <i class="bi bi-file-earmark-pdf-fill"></i>&nbsp
+                                                {% elif block.blocktype.type_name == 'Webmark' %}
+                                                    <i class="bi bi-link-45deg"></i>&nbsp
+                                                {% endif %}
+
+                                                {{ block.blocktype }}
+                                            </span><!-- End Block type -->
+
+                                            <!-- Item body -->
+                                            <div class="container | px-0">
+                                                <div class="row g-0">
+
+                                                    {% if block.blocktype.type_name == 'Text' %}
+                                                        <div class="col-12 {% if user_access.permission == '2' %}col-sm-11{% endif %}" style="overflow: hidden;">
+                                                            {{ block.textcontent.content_text|safe }}
+                                                        </div>
+
+                                                        {% if user_access.permission == '2' %}
+                                                            <div class="col-sm-1 text-center">
+                                                                <a href="{% url 'a01_note:text-content-form' block.id page.id %}" type="button" class="btn btn-outline-secondary btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-pencil-fill"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {% if block.blocktype.type_name == 'Image' %} <!-- TODO: Add a range input for change the image's size -->
+                                                        <div class="col-12 {% if user_access.permission == '2' %}col-sm-11{% endif %} | text-center">
+                                                            {% if block.imagecontent.image_content %}
+                                                                <img src="{{ block.imagecontent.image_content.url }}" class="img-fluid | rounded" alt="Image content" style="width: 20%;">
+                                                            {% endif %}
+                                                        </div>
+
+                                                        {% if user_access.permission == '2' %}
+                                                            <div class="col-sm-1 text-center">
+                                                                <a href="{% url 'a01_note:image-content-form' block.id page.id %}" type="button" class="btn btn-outline-secondary btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-pencil-fill"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {% if block.blocktype.type_name == 'File' %}
+                                                        <div class="col-12 {% if user_access.permission == '2' %}col-sm-11{% endif %} | text-center">
+                                                            {% if block.filecontent.file_content %}
+                                                                <a href="{{ block.filecontent.file_content.url }}" target="_blank" rel="noopener noreferrer">
+                                                                    {{ block.filecontent.file_content.url|slice:"45:" }} <!-- FIXME: Change the way for showing the file name -->
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+
+                                                        {% if user_access.permission == '2' %}
+                                                            <div class="col-sm-1 text-center">
+                                                                <a href="{% url 'a01_note:file-content-form' block.id page.id %}" type="button" class="btn btn-outline-secondary btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-pencil-fill"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {% if block.blocktype.type_name == 'Webmark' %}
+                                                        <div class="col-12 {% if user_access.permission == '2' %}col-sm-11{% endif %} | text-center">
+                                                            {% if block.webmarkcontent.url_content %}
+                                                                <a href="{{ block.webmarkcontent.url_content }}" target="_blank" rel="noopener noreferrer">
+                                                                    {{ block.webmarkcontent.url_content }}
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+
+                                                        {% if user_access.permission == '2' %}
+                                                            <div class="col-sm-1 text-center">
+                                                                <a href="{% url 'a01_note:webmark-content-form' block.id page.id %}" type="button" class="btn btn-outline-secondary btn-sm" title="Edit content" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-pencil-fill"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                </div>
+                                            </div><!-- End Item body -->
+
+                                        </div><!-- End Block content -->
+
+                                    </div>
+                                </div><!-- Block item -->
+
+                            {% empty %}
+                                <div class="row mb-3 text-center">
+
+                                    <div class="col-12 | text-muted mt-4">
+                                        <span style="font-size: 5rem;">👀️</span>
+                                        <h6 class="py-2 mb-1">
+                                            <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                        </h6>
+                                    </div>
+
+                                </div>
+                            {% endfor %}<!-- End Content -->
+
+                            <!-- Add content -->
+                            {% if user_access.permission == '2' %}
+                                <div class="row g-0 mb-3 text-center">
+
+                                    <div class="col-12">
+                                        <a href="{% url 'a01_note:block-index-create' page.id %}" type="button" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-plus-circle-fill"></i> |
+                                            Add content
+                                        </a>
+                                    </div>
+
+                                </div>
+                            {% endif %}<!-- End Add content -->
+
+                        </div><!-- Tab for page contents -->
+
+                        <!-- Tab for page children -->
+                        <div class="tab-pane fade" id="children-list">
+
+                            <!-- Children options -->
+                            <div class="row g-0 border-bottom pb-1">
+                                <div class="col-6 | text-start my-auto text-muted">
+                                    <h6 class="text-muted pb-2 mb-1">Children</h6>
+                                </div>
+
+                                {% if user_access.permission == '2' %}
+                                    <div class="col-6 text-end">
+                                        <a href="{% url 'a01_note:child-page-create' page.id %}" type="button" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-plus-circle-fill"></i> |
+                                            Add child <i>(Page)</i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div><!-- End Children options -->
+
+                            <br>
+
+                            <!-- Page's children -->
+                            {% if page.child_page.count >  0 %}
+
+                                <div class="row g-0 mb-3">
+                                    <div class="col-12 | my-autoA">
+
+                                        <!-- Children table -->
+                                        <table class="table table-hover table-sm" style="font-size: 0.9rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Actions</th>
+                                                    <th class="ps-2" scope="col">Name</th>
+                                                    {% comment %}
+                                                    <th scope="col">Tags</th>
+                                                    {% endcomment %}
+                                                    <th scope="col">Created at</th>
+                                                    <th scope="col">Updated at</th>
+                                                </tr>
+                                            </thead>
+
+                                            <!-- Child item -->
+                                            <tbody>
+                                                {% for child in page.child_page.all %}
+
+                                                    {% if child.owner == user or user.is_superuser or child.is_shared == True %}
+
+                                                        {% if child.owner == user or user.is_superuser or child.sharing_permission == '2' %}
+                                                            <!-- Modal confirm deletion -->
+                                                            {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='a01_note:page-delete' model_id=child.id forloop_counter=child.id only %}
+                                                            <!-- End Modal confirm deletion -->
+                                                        {% endif %}
+
+                                                        <!-- Child item -->
+                                                        <tr>
+
+                                                            <!-- Child options -->
+                                                            <td style="width: 5rem;">
+                                                                {% if child.owner == user or user.is_superuser or child.sharing_permission == '2' %}
+                                                                    <a type="button" data-bs-toggle="modal" data-bs-target="#modalConfirmDelete-{{ child.id }}" class="btn btn-outline-danger btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </a>
+                                                                {% endif %}
+
+                                                                <a href="{% url 'a01_note:page-detail' child.id %}" type="button" class="btn btn-outline-primary btn-sm" style="font-size: 0.8rem; padding: 0.05rem 0.28rem;">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </a>
+                                                            </td><!-- End Child options -->
+
+                                                            <!-- Child title -->
+                                                            <td class="ps-2">
+                                                                {% if child.emoji %} {{ child.emoji }} {% endif %}
+                                                                {{ child.page_name }}
+                                                            </td>
+
+                                                            {% comment %}
+                                                            <!-- Child tags -->
+                                                            <td style="font-size: 0.8rem;">
+                                                                {% for tag in child.tag_set.all %}
+                                                                <a href="#" class="text-reset">
+                                                                    <span class="badge bg-primary">{{ tag.tag_name }}</span>
+                                                                </a>
+                                                                {% empty %}
+                                                                <i>Add your tags inside...</i>
+                                                                {% endfor %}
+                                                            </td>
+                                                            {% endcomment %}
+
+                                                            <!-- Child date -->
+                                                            <td style="font-size: 0.8rem;">{{ child.created_at|date:"D, d-m-Y" }}</td>
+                                                            <td style="font-size: 0.8rem;">{{ child.updated_at|date:"D, d-m-Y" }}</td>
+                                                        </tr><!-- End Child item -->
+
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tbody><!-- End Child item -->
+
+                                            <!-- Add Child -->
+                                            {% if page.owner == user or user.is_superuser or child.sharing_permission == '2' %}
+                                                <tfoot>
+                                                    <tr>
+                                                        <th scope="row" colspan="7" class="text-center py-3 border-0">
+                                                            <a href="{% url 'a01_note:child-page-create' page.id %}" type="button" class="btn btn-outline-primary btn-sm">
+                                                                <i class="bi bi-plus-circle-fill"></i> |
+                                                                Add child <i>(Page)</i>
+                                                            </a>
+                                                        </th>
+                                                    </tr>
+                                                </tfoot>
+                                            {% endif %}<!-- Add Child -->
+
+                                        </table><!-- End Children table -->
+
+
+                                    </div>
+                                </div>
+
+                            {% else %}
+                                <div class="row mb-3 text-center">
+
+                                    <div class="col-12 | text-muted mt-4">
+                                        <span style="font-size: 5rem;">👀️</span>
+                                        <h6 class="py-2 mb-1">
+                                            <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                        </h6>
+                                    </div>
+
+                                </div>
+                            {% endif %}<!-- End Page's children -->
+
+                        </div><!-- Tab for page children -->
+
+                        <!-- Tab for evaluation -->
+                        {# TO-DO: Keep this tab id for now #}
+                        <div class="tab-pane fade" id="deck-detail">
+
+                            {% if page.deck %}
+
+                                {% if page.deck.owner == user or user.is_superuser or page.deck.is_shared == True %}
+
+                                    {% if page.deck.owner == user or user.is_superuser %}
+                                        <!-- Modal confirm deletion -->
+                                        {% include 'a01_note/layout/modal_confirm_delete.html' with view_name='evaluation:deck-delete' model_id=page.deck.id forloop_counter=0 url_hash='#deck-detail' only %}
+                                        <!-- End Modal confirm deletion -->
+                                    {% endif %}
+
+                                    <!-- Deck options -->
+                                    <div class="row g-0 border-bottom mb-3 pb-1">
+                                        <div class="col-6 | text-start my-auto text-muted">
+                                            <h6>Deck detail</h6>
+                                        </div>
+
+                                        <!-- Options -->
+                                        {% if page.deck.owner == user or user.is_superuser %}
+                                            <div class="col-6">
+
+                                                <div class="d-flex">
+                                                    <div class="btn-group ms-auto">
+
+                                                        <a type="button" class="text-muted" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-gear-fill"></i>
+                                                        </a>
+
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <!-- Deck share  -->
+                                                            <li>
+                                                                <a class="dropdown-item | py-1 d-flex align-items-center" type="button">
+                                                                    <i class="bi bi-globe" style="font-size: 0.8rem;"></i>&nbsp
+
+
+                                                                    <form action="{% url 'evaluation:deck-share' page.deck.id %}#deck-detail" method="post" class="d-flex">
+                                                                        {% csrf_token %}
+
+                                                                        <button type="submit" class="btn btn-sm p-0">Share</button>
+
+                                                                        <div class="form-check form-switch">
+                                                                            {% if page.deck.is_shared == True %}
+                                                                            <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck" checked>
+                                                                            {% else %}
+                                                                            <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck">
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </form>
+                                                                </a>
+                                                            </li><!-- End Deck share  -->
+
+                                                            <li>
+                                                                <a href="{% url 'evaluation:deck-upsert' page.id %}#deck-detail" class="dropdown-item py-1" type="button">
+                                                                    <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                                                                    <span>Update</span>
+                                                                </a>
+                                                            </li>
+
+                                                            <!-- Button trigger modal -->
+                                                            <li class="">
+                                                                <a href="" class="dropdown-item | py-0 pt-1 text-danger" type="button" data-bs-toggle="modal"
+                                                                data-bs-target="#modalConfirmDelete-0">
+
+                                                                    <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                                                                    <span>Delete</span>
+                                                                </a>
+                                                            </li><!-- End Button trigger modal -->
+                                                        </ul>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}<!-- End Options -->
+
+                                    </div><!-- End Deck options -->
+
+                                    <!-- Deck detail -->
+                                    <div class="row g-0 mb-3">
+                                        <div class="col-sm-8 mx-auto">
+
+                                            <!-- Deck description -->
+                                            {% if page.deck.description %}
+                                                <div class="row mb-3">
+                                                    <label class="col-sm-2 text-muted">Detail</label>
+
+                                                    <div class="col-sm-10">
+                                                        <span>{{ page.deck.description }}</span>
+                                                    </div>
+                                                </div>
+                                            {% endif %}<!-- End Deck description -->
+
+                                            <!-- Deck cards -->
+                                            <fieldset class="row mb-3">
+                                                <label class="col-sm-2 text-muted">Cards</label>
+
+                                                <div class="col-sm-10">
+                                                    <div class="mb-1">
+                                                        <span class="badge rounded-pill bg-primary">{{ page.deck.new_card }}</span>
+                                                        <span class="text-primary" style="font-size: 0.9rem;">New</span>
+                                                    </div>
+
+                                                    <div class="mb-1">
+                                                        <span class="badge rounded-pill bg-secondary">{{ page.deck.learning_card }}</span>
+                                                        <span class="text-secondary" style="font-size: 0.9rem;">Learning</span>
+                                                    </div>
+
+                                                    <div class="mb-1">
+                                                        <span class="badge rounded-pill bg-warning">{{ page.deck.review_card }}</span>
+                                                        <span class="text-warning" style="font-size: 0.9rem;">To review</span>
+                                                    </div>
+                                                </div>
+                                            </fieldset><!-- End Deck cards -->
+
+                                            <!-- Deck test -->
+                                            {% if page.deck.owner == user or user.is_superuser %}
+                                                {% if page.deck.card_set.count > 0 %}
+
+                                                    <div class="row mb-3">
+                                                        <div class="col-sm-10 ms-auto d-flex">
+
+                                                            <!-- Add or start again -->
+                                                            {% if active_test is False %}
+                                                                <form action="{% url 'evaluation:test-create' page.deck.id %}" method="post">
+                                                                    {% csrf_token %}
+
+                                                                    {% if page.deck.new_card == 0 %}
+
+                                                                        <button class="btn btn-primary btn-sm me-3" type="submit">
+                                                                            <i class="bi bi-arrow-repeat"></i>
+                                                                            <span>Start again</span>
+                                                                        </button>
+
+                                                                    {% else %}
+
+                                                                        <button class="btn btn-secondary btn-sm me-3" type="submit">
+                                                                            <i class="bi bi-plus-circle-fill"></i>
+                                                                            <span>Add test</span>
+                                                                        </button>
+
+                                                                    {% endif %}<!-- End Add or start again -->
+                                                                </form>
+                                                            {% endif %}<!-- End Add or start again -->
+
+                                                            <!-- Active test -->
+                                                            {% if active_test is not False %}
+                                                                <a href="{% url 'evaluation:test-detail' active_test.id %}" class="btn btn-outline-primary btn-sm me-3" type="button">
+                                                                    <i class="bi bi-calendar-event"></i>
+                                                                    <span>Go active test</span>
+                                                                </a>
+                                                            {% endif %}<!-- End Active test -->
+
+                                                            <!-- Test history -->
+                                                            {% if page.deck.test_set.count > 0 %}
+                                                                <a href="{% url 'evaluation:test-list' page.deck.id %}" class="btn btn-outline-secondary btn-sm" type="button">
+                                                                    <i class="bi bi-clock-history"></i>
+                                                                    <span>View test history</span>
+                                                                </a>
+                                                            {% endif %}<!-- End Test history -->
+
+                                                        </div>
+                                                    </div>
+
+                                                {% endif %}
+                                            {% endif %}<!-- Deck test -->
+
+                                        </div>
+                                    </div><!-- End Deck detail -->
+
+                                    <!-- Card options -->
+                                    <div class="row g-0 border-bottom mb-3 pb-1">
+                                        <div class="col-6 | text-start my-auto text-muted">
+                                            <h6>Card list</h6>
+                                        </div>
+                                    </div><!-- End Card options -->
+
+                                    <!-- Card items -->
+                                    <div class="row g-0 mb-3">
+
+                                        {% if page.deck.card_set.count > 0 %}
+                                            <div class="col-sm-12">
+                                                <div class="accordion accordion-flush_not" id="card-item-accordion">
+
+                                                    {% for card in page.deck.card_set.all %}
+
+                                                        <!-- Accordion card item -->
+                                                        <div class="accordion-item">
+
+                                                            <!-- Card header -->
+                                                            <h2 class="accordion-header" id="card-item-header-{{ forloop.counter }}">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#card-item-{{ forloop.counter }}" aria-expanded="false" aria-controls="card-item-{{ forloop.counter }}">
+                                                                    <span class="w-100 d-flex">
+                                                                        <div class="me-2">
+                                                                            {% if card.status == '0' %}
+                                                                            <span class="badge rounded-pill bg-primary">N</span>
+                                                                            {% elif card.status == '1' %}
+                                                                            <span class="badge rounded-pill bg-secondary">L</span>
+                                                                            {% elif card.status == '2' %}
+                                                                            <span class="badge rounded-pill bg-warning">R</span>
+                                                                            {% endif %}
+                                                                        </div>
+
+                                                                        {{ card.front|truncatewords_html:16|safe }}
+                                                                    </span>
+
+                                                                    {% if page.deck.owner == user or user.is_superuser %}
+                                                                        <div class="btn-group btn-group-sm ms-auto me-2">
+                                                                            <a href="{% url 'evaluation:card-delete' card.id %}#deck-detail" type="button" class="btn btn-outline-danger py-0">
+                                                                                <i class="bi bi-trash" style="font-size: 0.9rem;"></i>
+                                                                            </a>
+                                                                            <a href="{% url 'evaluation:card-update' card.id %}#deck-detail" type="button" class="btn btn-outline-info py-0">
+                                                                                <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </button>
+                                                            </h2><!-- End Card header -->
+
+                                                            <!-- Card body -->
+                                                            <div id="card-item-{{ forloop.counter }}" class="accordion-collapse collapse border-top" aria-labelledby="card-item-header-{{ forloop.counter }}" data-bs-parent="#card-item-accordion">
+                                                                <div class="accordion-body ms-5 p-3">
+
+                                                                    <div class="row mb-1">
+                                                                        <div class="col-sm-2">
+                                                                            <i class="bi bi-question-lg"></i>
+                                                                            <strong>Question</strong>
+                                                                        </div>
+
+                                                                        <div class="col-sm-10">
+                                                                            {{ card.front|safe }}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="row mb-1">
+                                                                        <div class="col-sm-2">
+                                                                            <i class="bi bi-check-all"></i>
+                                                                            <strong>Answer</strong>
+                                                                        </div>
+
+                                                                        <div class="col-sm-10">
+                                                                            {{ card.back|safe }}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {% if card.extra_info %}
+                                                                    <div class="row mb-1">
+                                                                        <div class="col-sm-2">
+                                                                            <i class="bi bi-info-lg"></i>
+                                                                            <strong>Extra info</strong>
+                                                                        </div>
+
+                                                                        <div class="col-sm-10">
+                                                                            {{ card.extra_info|safe }}
+                                                                        </div>
+                                                                    </div>
+                                                                    {% endif %}
+
+                                                                </div>
+                                                            </div><!-- End Card body -->
+
+                                                        </div><!-- End Accordion card item -->
+
+                                                    {% endfor %}
+
+                                                </div>
+                                            </div>
+
+                                            <!-- Add card -->
+                                            {% if page.deck.owner == user %}
+                                                <div class="col-sm-12 text-center mt-2">
+                                                    <a href="{% url 'evaluation:card-create' page.deck.id %}#deck-detail" type="button" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-file-earmark-plus"></i>
+                                                        Add card
+                                                    </a>
+                                                </div>
+                                            {% endif %}<!-- End Add card -->
+
+                                        {% else %}
+
+                                            {% if page.deck.owner == user or user.is_superuser %}
+                                                <div class="col-sm-12 | text-muted text-center">
+                                                    <a href="{% url 'evaluation:card-create' page.deck.id %}#deck-detail" class="text-reset" style="font-size: 5rem;">
+                                                        <i class="bi bi-file-earmark-plus"></i>
+                                                    </a>
+                                                    <h5 class="text-muted py-2 mb-1">Add some cards!</h5>
+                                                </div>
+
+                                            {% else %}
+                                                <div class="col-12 | text-muted mt-4 text-center">
+                                                    <span style="font-size: 5rem;">👀️</span>
+                                                    <h6 class="py-2 mb-1">
+                                                        <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                                    </h6>
+                                                </div>
+                                            {% endif %}
+
+                                        {% endif %}
+
+                                    </div><!-- End Card items -->
+
+                                {% else %}
+                                    <div class="row mb-3 text-center">
+
+                                        <div class="col-12 | text-muted">
+                                            <span style="font-size: 5rem;">👀️</span>
+                                            <h6 class="py-2 mb-1">
+                                                <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                            </h6>
+                                        </div>
+
+                                    </div>
+                                {% endif %}
+
+                            {% else %}
+                                <!-- Add new deck -->
+                                <div class="row mb-3 text-center">
+
+                                    <div class="col-12 | text-muted">
+                                        <span style="font-size: 5rem;">👀️</span>
+
+                                        {% if user_access.permission == '2' %}
+                                            <h6 class="py-2 mb-1">
+                                                <span class="badge rounded-pill bg-light text-muted">You haven't created any deck yet. Try to add one!</span>
+                                            </h6>
+                                            <a href="{% url 'evaluation:deck-upsert' page.id %}#deck-detail" type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-plus-circle-fill"></i> |
+                                                Add new deck
+                                            </a>
+                                        {% else %}
+                                            <h6 class="py-2 mb-1">
+                                                <span class="badge rounded-pill bg-light text-muted">Empty</span>
+                                            </h6>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div> <!-- End Add new deck -->
+
+                            {% endif %}
+
+                        </div><!-- Tab for evaluation -->
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock page_section %}
+
+{% block modal_section %}
+
+    {% for summary in page.summary_set.all %}
+        {% if summary.summary_type == "0" %}
+
+            {% if summary.disease.cie10.code != "" %}
+                {% include 'a01_note/layout/modal_show_disease_summary.html' with disease=summary.disease user_access=user_access forloop_counter=forloop.counter only %}
+            {% endif %}
+
+        {% endif %}
+    {% endfor %}
+
+{% endblock modal_section %}

@@ -1,0 +1,87 @@
+# Project details
+###### All details about _app_Notes_
+----
+
+### Requerimientos
+1. CRUD notas
+  - Mover hojas
+  - Exportar en PDF
+  - Jerarquia de paginas
+2. CRUD busquedas
+ - Filtros (nonsensitive)
+ - 
+3. CRUD usuarios
+4. CRUD preguntas
+- Texto de preguntas, respuestas e imagenes
+5. CRUD community
+
+## To-do
+- Django remove the file from the db but not from the server
+
+### Extra Features
+- Ajax
+- [django-balloon-block-editor](https://github.com/matix-io/django-balloon-block-editor)
+
+### Questions
+- How to encript the ID field during GET request?
+- Is it okeyto send via GET a default number in order to evaluate for add a page parent or page children? (using 0, for instance)
+
+### General bugs
+- Css within Templates
+- page_update mixes object for rendering web contents (for viewing)
+
+### layout structure
+```
+{% block website_title %}App Notes | Lazy and Easy {% endblock website_title%}
+{% block page_title %} Blank Page {% endblock page_title %}
+{% block page_section %}
+{% endblock page_section %}
+```
+
+### Credentials
+```
+SKYlex_12: root
+SKYlex@12: skylex
+@dm:n_PA55awa7: djangoadmin (db)
+cmspp123: skylex (admindashboard)
+```
+
+### Trash data
+```
+00_University 🎓️
+00_Book 📂️
+- 01_Top 5 health concerns ☢️
+  - 02_Cancer
+  - 02_High Cholesterol
+  - 02_Quit Smoking
+  - 02_Depression
+  - 02_Diabetes
+- 01_Heart Health
+- 01_Child Nutrition
+
+Short text, ShortText
+Select, Select
+Number, Number
+Datetime, Datetime
+Tag, Tag
+File, File
+Web Bookmark, `WebBookmark`
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

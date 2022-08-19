@@ -1,0 +1,69 @@
+<li class="list-group-item d-flex justify-content-between align-items-start table-responsive">
+
+    <!-- Deck checkbox -->
+    {% if page.deck.card_set.count == 0 %}
+        <input class="form-check-input me-1 border-0 bg-transparent" type="checkbox" aria-label="Checkbox" disabled style="min-width: 14px;">
+    {% else %}
+        <input class="form-check-input me-1" type="checkbox" name="chkbx_id_deck-{{ page.deck.id }}" value="{{ page.deck.id }}" aria-label="Checkbox" style="min-width: 14px;">
+    {% endif %}
+    <!-- End Deck checkbox -->
+
+    <!-- Deck detail -->
+    <div class="ms-2 me-auto" style="min-width: 300px;">
+        <!-- Deck name -->
+        <div class="fw-bold">
+            <a href="{% url 'a01_note:page-detail' page.id %}{{ url_hash|default_if_none:'' }}" type="" class="">
+                {{ page.deck.deck_name }}
+            </a>
+        </div><!-- Deck name -->
+
+        <!-- Deck page parent -->
+        <span class="fst-italic text-muted">
+            <span  style="font-size:  0.7rem;">from</span>
+            {% if page.emoji %}{{ page.emoji }}{% endif %}
+            {{ page.page_name }}
+        </span><!-- End Deck page parent -->
+
+    </div><!-- End Deck detail -->
+
+    <!-- Deck cards -->
+    <div class="d-flex">
+        {% if page.deck.card_set.count == 0 %}
+            <span class="badge border border-dark text-dark rounded-pill">
+                <i class="bi bi-suit-club"></i>&nbsp
+                {{ page.deck.card_set.count }} cards
+            </span>
+        {% else %}
+            <span class="badge bg-dark rounded-pill">
+                <i class="bi bi-suit-club"></i>&nbsp
+                {{ page.deck.card_set.count }} cards
+            </span>
+        {% endif %}
+
+        <span class="badge bg-primary rounded-pill ms-2">{{ page.deck.new_card }}</span>
+        <span class="badge bg-secondary rounded-pill ms-2">{{ page.deck.learning_card }}</span>
+        <span class="badge bg-warning rounded-pill ms-2">{{ page.deck.review_card }}</span>
+    </div><!-- End Deck cards -->
+
+    <!-- Deck test -->
+    <div class="d-flex ms-4">
+
+        {% if page.deck.test_set.count > 0 %}
+            <span class="badge bg-secondary">
+                <a href="{% url 'evaluation:test-list' page.deck.id %}" type="button" class="text-white" title="View test history">
+                    <i class="bi bi-clock-history"></i>&nbsp
+                    {{ page.deck.test_set.count }} tests
+                </a>
+            </span>
+        {% else %}
+            <span class="badge bg-transparent border border-secondary">
+                <a href="{% url 'evaluation:test-list' page.deck.id %}" type="button" class="text-secondary" title="View test history">
+                    <i class="bi bi-clock-history"></i>&nbsp
+                    {{ page.deck.test_set.count }} tests
+                </a>
+            </span>
+        {% endif %}
+
+    </div><!-- End Deck test -->
+
+</li>

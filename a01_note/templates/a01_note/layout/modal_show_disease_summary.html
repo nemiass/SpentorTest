@@ -1,0 +1,172 @@
+<div class="modal fade" id="modalDiseaseSummary-{{ forloop_counter }}" tabindex="-1" aria-labelledby="modalDiseaseSummaryLabel-{{ forloop_counter }}" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header my-auto py-2">
+				<span class="pe-2"><i class="bi bi-bug-fill"></i></span>
+				<h6 class="modal-title" id="modalDiseaseSummaryLabel-{{ forloop_counter }}">
+					Disease &mdash; {{ disease.cie10.code }}
+				</h6>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body | text-center">
+
+				<form class="row g-3" style="font-size: 0.9rem;">
+					<div class="col-md-12">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.cie10.code }} ─ {{ disease.cie10.description }}"
+								readonly
+							>
+							<label>Cie10</label>
+						</div>
+					</div>
+
+					{# <-- ======== Constraint (min age) ======== --> #}
+					<div class="col-md-3">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.min_age }}"
+								readonly
+							>
+							<label>Min age</label>
+						</div>
+					</div>
+
+					{# <-- ======== Constraint (age) ======== --> #}
+					<div class="col-md-3">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.max_age }}"
+								readonly
+							>
+							<label>Max age</label>
+						</div>
+					</div>
+
+					{# <-- ======== Constraint (sex) ======== --> #}
+					<div class="col-md-6">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.get_sex_display }}"
+								readonly
+							>
+							<label>Sex</label>
+						</div>
+					</div>
+
+					{# <-- ======== Cause ======== --> #}
+					{% if disease.cause is not None %}
+					<div class="col-md-12">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.cause }}"
+								readonly
+							>
+							<label>Cause</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ======== Diagnostic ======== --> #}
+					{% if disease.diagnostic is not None %}
+					<div class="col-md-12">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.diagnostic }}"
+								readonly
+							>
+							<label>Diagnostic</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ========  Risk factor ======== --> #}
+					{% if disease.risk_factor is not None %}
+					<div class="col-md-12">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.risk_factor }}"
+								readonly
+							>
+							<label> Risk factor</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ========  Prevention ======== --> #}
+					{% if disease.prevention is not None %}
+					<div class="col-md-12">
+						<div class="form-floating">
+							<input type="text" class="form-control"
+								value="{{ disease.prevention }}"
+								readonly
+							>
+							<label> Prevention</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ========  Transmission mode ======== --> #}
+
+					{% if disease.transmissionmode.count > 0 %}
+					<div class="col-12">
+						<div class="form-floating">
+						<textarea class="form-control" placeholder="Address"
+							style="height: 100px;" readonly
+						>{% for transmission_mode in disease.transmissionmode.all %}👾️  {{ transmission_mode.description }}
+{% endfor %}
+						</textarea>
+						<label>Transmission mode</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ========  Symptom ======== --> #}
+					{% if disease.symptom.count > 0 %}
+					<div class="col-12">
+						<div class="form-floating">
+						<textarea class="form-control" placeholder="Address"
+							style="height: 100px;" readonly
+						>{% for symptom in disease.symptom.all %}🤕️  {{ symptom.description }}
+{% endfor %}
+						</textarea>
+						<label>Symptom</label>
+						</div>
+					</div>
+					{% endif %}
+
+					{# <-- ========  Treatment ======== --> #}
+					{% if disease.drug.count > 0 %}
+					<div class="col-12">
+						<div class="form-floating">
+						<textarea class="form-control" placeholder="Address"
+							style="height: 100px;" readonly
+						>{% for drug in disease.drug.all %}💊️  {{ drug.name }} ({{ drug.concentration }}) ─ {{ drug.pharmaceutical_short_form }}
+{% endfor %}
+						</textarea>
+						<label>Treatment</label>
+						</div>
+					</div>
+					{% endif %}
+
+				</form>
+			</div>
+
+			<div class="modal-footer my-auto py-2">
+				{% if user_access.permission == '2' %}
+					<a href="{% url 'a01_note:disease-summary-upsert' disease.summary.id %}" type="button" class="btn btn-warning btn-sm">
+						<i class="bi bi-pencil-square"></i>
+						{# cie10.code is only used as a validator parameter #}
+						{% if summary.disease.cie10.code != "" %} Update
+						{% else %} Add details {% endif %}
+					</a>
+				{% endif %}
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+					Close
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

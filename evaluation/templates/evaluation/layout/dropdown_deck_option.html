@@ -1,0 +1,58 @@
+<!-- Page options -->
+<div class="d-flex">
+    <div class="btn-group ms-auto">
+
+        <a type="button" class="text-muted" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-gear-fill"></i>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+            <!-- Deck share  -->
+            <li>
+                <a class="dropdown-item | py-1 d-flex align-items-center" type="button">
+                    <i class="bi bi-share-fill" style="font-size: 0.8rem;"></i>&nbsp
+
+                    <form action="{% url 'evaluation:deck-share' deck.id %}" method="post" class="d-flex">
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-sm p-0">Share</button>
+
+                        <div class="form-check form-switch">
+                            {% if deck.is_shared == True %}
+                            <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck" checked>
+                            {% else %}
+                            <input class="form-check-input my-1 ms-auto" type="checkbox" name="is_shared" id="share_deck">
+                            {% endif %}
+                        </div>
+                    </form>
+                </a>
+            </li><!-- End Deck share  -->
+
+            <!-- Deck update  -->
+            <li>
+                {% if deck.type == '0' %}
+                    <a href="{% url 'evaluation:deck-upsert' deck.page.id %}" class="dropdown-item py-1" type="button">
+                        <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                        <span>{{ deck.id }} - Update</span>
+                    </a>
+
+                {% else %}
+                    <a href="" class="dropdown-item py-1" type="button">
+                        <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+                        <span>{{ deck.id }} - Update</span>
+                    </a>
+                {% endif %}
+            </li><!-- End Deck update  -->
+
+            <!-- Button trigger modal -->
+            <li>
+                <a class="dropdown-item | py-0 pt-1 text-danger" type="button" data-bs-toggle="modal"
+                    data-bs-target="#modalConfirmDelete-{{ forloop_counter }}">
+
+                    <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                    <span>Delete</span>
+                </a>
+            </li><!-- End Button trigger modal -->
+        </ul>
+    </div>
+</div>
